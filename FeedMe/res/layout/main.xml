@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="fill_parent">
+	<LinearLayout android:orientation="vertical"
+		android:layout_width="fill_parent" android:layout_height="fill_parent">
+		<ScrollView android:id="@+id/stuff" android:layout_width="fill_parent"
+			android:layout_height="wrap_content">
+			<LinearLayout android:orientation="vertical"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:id="@+id/posts_list">
+				<TextView android:layout_width="fill_parent"
+					android:layout_height="wrap_content" android:gravity="center"
+					android:text="Refresh to show new stories" />
+			</LinearLayout>
+		</ScrollView>
+	</LinearLayout>
+	<Button android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:text="@string/reload_posts"
+		android:id="@+id/main_page" android:layout_alignParentBottom="true"
+		android:layout_centerHorizontal="true" />
+	<ProgressBar android:id="@+id/loading_view"
+		android:layout_height="wrap_content" android:layout_width="wrap_content"
+		android:layout_alignParentTop="true" android:layout_alignParentRight="true"
+		android:visibility="invisible" style="@android:style/Widget.ProgressBar.Small" />
+</RelativeLayout>
