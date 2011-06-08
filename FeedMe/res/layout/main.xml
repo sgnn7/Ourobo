@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent" android:layout_height="fill_parent">
 	<LinearLayout android:orientation="vertical"
-		android:layout_width="fill_parent" android:layout_height="fill_parent">
+		android:layout_width="fill_parent" android:layout_height="fill_parent"
+		android:layout_marginBottom="50dip">
 		<ScrollView android:id="@+id/stuff" android:layout_width="fill_parent"
 			android:layout_height="wrap_content">
 			<LinearLayout android:orientation="vertical"
@@ -14,9 +15,10 @@
 			</LinearLayout>
 		</ScrollView>
 	</LinearLayout>
-	<Button android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:text="@string/reload_posts"
-		android:id="@+id/main_page" android:layout_alignParentBottom="true"
+	<ImageView android:layout_width="fill_parent"
+		android:layout_height="50dip" android:src="@drawable/refresh"
+		android:background="@android:color/transparent" android:id="@+id/main_page"
+		android:layout_alignParentBottom="true"
 		android:layout_centerHorizontal="true" />
 	<ProgressBar android:id="@+id/loading_view"
 		android:layout_height="wrap_content" android:layout_width="wrap_content"

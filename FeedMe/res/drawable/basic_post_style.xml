@@ -12,6 +12,5 @@
              android:bottom="10dp"
              /> 
 
-    <corners android:bottomRightRadius="2dp" android:bottomLeftRadius="2dp" 
-     android:topLeftRadius="2dp" android:topRightRadius="2dp"/> 
+    <corners android:radius="2dp"/> 
 </shape>
