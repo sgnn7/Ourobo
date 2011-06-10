@@ -1,4 +1,4 @@
-package org.sgnn7.feedme.util;
+package org.sgnn7.ourobo.util;
 
 import java.net.URL;
 
@@ -6,7 +6,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.sgnn7.feedme.data.UrlFileType;
+import org.sgnn7.ourobo.data.UrlFileType;
 
 public class HttpUtils {
 	public static String getPageContent(String uri) {

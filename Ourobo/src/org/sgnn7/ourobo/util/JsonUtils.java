@@ -1,4 +1,4 @@
-package org.sgnn7.feedme.util;
+package org.sgnn7.ourobo.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import org.codehaus.jackson.map.DeserializationContext;
 import org.codehaus.jackson.map.DeserializationProblemHandler;
 import org.codehaus.jackson.map.JsonDeserializer;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.sgnn7.feedme.data.RedditPost;
+import org.sgnn7.ourobo.data.RedditPost;
 
 public class JsonUtils {
 	private final static ObjectMapper objectMapper;

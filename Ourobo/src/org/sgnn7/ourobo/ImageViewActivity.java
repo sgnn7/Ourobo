@@ -1,7 +1,7 @@
-package org.sgnn7.feedme;
+package org.sgnn7.ourobo;
 
-import org.sgnn7.feedme.util.HttpUtils;
-import org.sgnn7.feedme.util.LogMe;
+import org.sgnn7.ourobo.util.HttpUtils;
+import org.sgnn7.ourobo.util.LogMe;
 
 import android.app.Activity;
 import android.graphics.Bitmap;

@@ -1,4 +1,4 @@
-package org.sgnn7.feedme.data;
+package org.sgnn7.ourobo.data;
 
 import java.net.URL;
 

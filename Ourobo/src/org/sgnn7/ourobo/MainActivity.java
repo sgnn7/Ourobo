@@ -1,4 +1,4 @@
-package org.sgnn7.feedme;
+package org.sgnn7.ourobo;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,11 +8,11 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.sgnn7.feedme.data.RedditPost;
-import org.sgnn7.feedme.data.UrlFileType;
-import org.sgnn7.feedme.util.HttpUtils;
-import org.sgnn7.feedme.util.JsonUtils;
-import org.sgnn7.feedme.util.LogMe;
+import org.sgnn7.ourobo.data.RedditPost;
+import org.sgnn7.ourobo.data.UrlFileType;
+import org.sgnn7.ourobo.util.HttpUtils;
+import org.sgnn7.ourobo.util.JsonUtils;
+import org.sgnn7.ourobo.util.LogMe;
 
 import android.app.Activity;
 import android.content.Intent;

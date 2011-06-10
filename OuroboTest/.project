@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>FeedMeTest</name>
+	<name>OuroboTest</name>
 	<comment></comment>
 	<projects>
-		<project>FeedMe</project>
+		<project>Ourobo</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

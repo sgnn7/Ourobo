@@ -1,4 +1,4 @@
-package org.sgnn7.feedme.util;
+package org.sgnn7.ourobo.util;
 
 import android.util.Log;
 
@@ -7,7 +7,7 @@ public class LogMe {
 		ERROR, WARN, INFO, DEBUG
 	}
 
-	private static final String PREFIX = "FeedMe";
+	private static final String PREFIX = "Ourobo";
 	private static final LogLevels LOG_LEVEL = LogLevels.ERROR;
 
 	public static void e(String value) {
