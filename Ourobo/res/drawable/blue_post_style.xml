@@ -3,9 +3,9 @@
     <solid android:color="#333333"/>    
 
 	<gradient
-        android:centerColor="@color/image_post_center_color"
-        android:endColor="@color/image_post_center_color"
-        android:startColor="@color/image_post_center_color"
+        android:centerColor="@color/blue_post_center_color"
+        android:endColor="@color/blue_post_center_color"
+        android:startColor="@color/blue_post_center_color"
         android:type="linear"
     />
 

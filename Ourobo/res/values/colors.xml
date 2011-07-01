@@ -1,0 +1,8 @@
+<resources>
+    <color name="gray_post_center_color">#e7eaec</color>
+    <color name="blue_post_center_color">#C8D7E4</color>
+    <color name="image_post_center_color">#C8E7D4</color>
+    <color name="post_text_color">#000</color>
+    <color name="white">#FFF</color>
+    <color name="post_border">#C6BFB9</color>
+</resources>

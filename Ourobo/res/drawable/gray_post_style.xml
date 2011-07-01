@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 <shape xmlns:android="http://schemas.android.com/apk/res/android"> 
-    <solid android:color="#333333"/>    
+    <solid android:color="#FFFFFF"/>    
 
 	<gradient
-        android:centerColor="@color/image_post_center_color"
-        android:endColor="@color/image_post_center_color"
-        android:startColor="@color/image_post_center_color"
+        android:centerColor="@color/gray_post_center_color"
+        android:endColor="@color/gray_post_center_color"
+        android:startColor="@color/gray_post_center_color"
         android:type="linear"
     />
 

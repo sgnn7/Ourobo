@@ -19,9 +19,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -42,10 +42,11 @@ public class MainActivity extends Activity {
 
 		setContentView(R.layout.main);
 
+		progressBar = (ProgressBar) findViewById(R.id.loading_view);
+
 		refreshButton = (ImageView) findViewById(R.id.main_page);
 		refreshButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View view) {
-				progressBar = (ProgressBar) findViewById(R.id.loading_view);
 				progressBar.setVisibility(View.VISIBLE);
 
 				refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.refresh_hilight));
@@ -55,6 +56,7 @@ public class MainActivity extends Activity {
 			}
 		});
 
+		new DownloadTask().execute(REDDIT_API_URI);
 	}
 
 	private class DownloadTask extends AsyncTask<String, Void, List<RedditPost>> {
@@ -98,23 +100,36 @@ public class MainActivity extends Activity {
 	}
 
 	private void addPostsToMainPage(List<RedditPost> results) {
+		LayoutInflater layoutInflater = getLayoutInflater();
 		LinearLayout mainView = (LinearLayout) findViewById(R.id.posts_list);
 		mainView.removeAllViews();
+
+		int index = 0;
 		for (final RedditPost redditPost : results) {
 			LogMe.d("Adding " + redditPost.getTitle());
-			TextView textView = new TextView(MainActivity.this);
+			View postHolder = layoutInflater.inflate(R.layout.post_layout, mainView, false);
+
+			TextView textView = (TextView) postHolder.findViewById(R.id.post_title);
 			textView.setText(redditPost.getTitle());
 
 			final UrlFileType fileType = HttpUtils.getFileType(redditPost.getUrl());
 
-			textView.setBackgroundDrawable(getResources().getDrawable(getBackgroundIdBasedOnType(fileType)));
-			textView.setOnClickListener(new OnClickListener() {
+			postHolder.setBackgroundDrawable(getResources().getDrawable(
+					getBackgroundIdBasedOnTypeAndIndex(fileType, index++)));
+			postHolder.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
 					startActivity(getIntentBasedOnFileType(redditPost, fileType));
 				}
-
 			});
-			mainView.addView(textView, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+
+			ImageView thumbnail = (ImageView) postHolder.findViewById(R.id.post_thumbnail);
+			if (fileType.equals(UrlFileType.IMAGE)) {
+				thumbnail.setImageDrawable(getResources().getDrawable(R.drawable.view_image));
+			} else {
+				thumbnail.setImageDrawable(getResources().getDrawable(R.drawable.browse));
+			}
+
+			mainView.addView(postHolder);
 		}
 
 	}
@@ -132,10 +147,13 @@ public class MainActivity extends Activity {
 		return targetIntent;
 	}
 
-	private int getBackgroundIdBasedOnType(UrlFileType fileType) {
-		int backdgoundId = R.drawable.basic_post_style;
-		if (fileType.equals(UrlFileType.IMAGE)) {
-			backdgoundId = R.drawable.picture_post_style;
+	private int getBackgroundIdBasedOnTypeAndIndex(UrlFileType fileType, int index) {
+		int backdgoundId = R.drawable.gray_post_style;
+		// if (fileType.equals(UrlFileType.IMAGE)) {
+		// backdgoundId = R.drawable.picture_post_style;
+		// } else if (index % 2 != 0) {
+		if (index % 2 != 0) {
+			backdgoundId = R.drawable.blue_post_style;
 		}
 		return backdgoundId;
 	}
