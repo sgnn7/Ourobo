@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	android:versionCode="1" android:versionName="1.0" package="org.sgnn7.ourobo">
+	android:versionCode="1" android:versionName="0.1" package="org.sgnn7.ourobo">
 	<uses-sdk android:minSdkVersion="7" />
 	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
 
@@ -12,7 +12,7 @@
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
-		<activity android:name="org.sgnn7.ourobo.ImageViewActivity" android:label="ImageView"
+		<activity android:name="BrowserViewActivity" android:label="BrowserView"
 			android:multiprocess="true" android:configChanges="orientation|keyboardHidden"
 			android:theme="@android:style/Theme.Black.NoTitleBar" />
 	</application>

@@ -16,7 +16,6 @@ import org.sgnn7.ourobo.util.LogMe;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -135,15 +134,8 @@ public class MainActivity extends Activity {
 	}
 
 	private Intent getIntentBasedOnFileType(final RedditPost redditPost, final UrlFileType fileType) {
-		Intent targetIntent = null;
-		switch (fileType) {
-		case IMAGE:
-			targetIntent = new Intent(MainActivity.this, ImageViewActivity.class);
-			targetIntent.putExtra(ImageViewActivity.IMAGE_LOCATION, redditPost.getUrl().toExternalForm());
-			break;
-		default:
-			targetIntent = new Intent("android.intent.action.VIEW", Uri.parse(redditPost.getUrl().toExternalForm()));
-		}
+		Intent targetIntent = new Intent(MainActivity.this, BrowserViewActivity.class);
+		targetIntent.putExtra(BrowserViewActivity.LOCATION, redditPost.getUrl().toExternalForm());
 		return targetIntent;
 	}
 
