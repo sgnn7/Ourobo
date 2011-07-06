@@ -63,6 +63,11 @@ public class AsyncThumbnailDownloader extends AsyncTask<Void, Void, Drawable> {
 		viewSwitcher.showNext();
 	}
 
+	@Override
+	protected void onCancelled() {
+		onPostExecute(null);
+	}
+
 	private Drawable getImageThumbnailWithFailover() {
 		Drawable thumbnail = getImage(thumbnailUrl);
 
