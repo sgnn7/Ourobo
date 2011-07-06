@@ -26,16 +26,16 @@
 		android:paddingLeft="15dip" android:paddingRight="5dip"
 		android:paddingTop="30dip" android:paddingBottom="30dip"
 		android:gravity="center_vertical" android:textColor="@color/post_text_color"
-		android:background="@android:color/transparent" />
-	<RelativeLayout android:id="@+id/post_score_holder" android:layout_width="wrap_content" 
-		android:layout_height="fill_parent" android:layout_marginRight="8dip">
-		<TextView android:id="@+id/post_score"
-			android:layout_width="wrap_content" android:layout_height="wrap_content"
-			android:paddingLeft="10dip" android:paddingRight="10dip"
-			android:paddingTop="0dip" android:paddingBottom="0dip"
-			android:gravity="center_vertical" android:background="@drawable/score_style"
-			android:hint="..." android:textColor="@color/score_color"
-			android:layout_centerInParent="true" android:maxLines="1"
-			android:minLines="1" />
+		android:textStyle="bold" android:background="@android:color/transparent" />
+	<RelativeLayout android:id="@+id/post_score_holder"
+		android:layout_width="wrap_content" android:layout_height="fill_parent"
+		android:layout_marginRight="8dip">
+		<TextView android:id="@+id/post_score" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:paddingLeft="10dip"
+			android:paddingRight="10dip" android:paddingTop="0dip"
+			android:paddingBottom="0dip" android:gravity="center_vertical"
+			android:background="@drawable/score_style" android:hint="..."
+			android:textColor="@color/score_color" android:layout_centerInParent="true"
+			android:maxLines="1" android:minLines="1" />
 	</RelativeLayout>
 </LinearLayout>
