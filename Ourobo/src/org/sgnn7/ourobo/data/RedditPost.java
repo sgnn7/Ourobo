@@ -3,12 +3,13 @@ package org.sgnn7.ourobo.data;
 import java.net.URL;
 
 public class RedditPost {
-	int score;
-	String title;
-	String id;
-	URL url;
-	String permalink;
-	int num_comments;
+	private int score;
+	private String title;
+	private String id;
+	private URL url;
+	private String permalink;
+	private int num_comments;
+	private String thumbnail;
 
 	public int getScore() {
 		return score;
@@ -56,5 +57,13 @@ public class RedditPost {
 
 	public void setNum_comments(int num_comments) {
 		this.num_comments = num_comments;
+	}
+
+	public String getThumbnail() {
+		return thumbnail;
+	}
+
+	public void setThumbnail(String thumbnail) {
+		this.thumbnail = thumbnail;
 	}
 }

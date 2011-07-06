@@ -14,6 +14,14 @@ public class LogMe {
 		Log.e(PREFIX, value);
 	}
 
+	public static void e(Exception e) {
+		String errorMessage = "NULL";
+		if (e != null && e.getMessage() != null) {
+			errorMessage = e.getMessage();
+		}
+		e(errorMessage);
+	}
+
 	public static void i(String value) {
 		if (logLevelAllows(LogLevels.INFO)) {
 			Log.i(PREFIX, value);

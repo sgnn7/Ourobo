@@ -3,6 +3,8 @@ package org.sgnn7.ourobo;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
@@ -10,12 +12,14 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.sgnn7.ourobo.data.RedditPost;
 import org.sgnn7.ourobo.data.UrlFileType;
+import org.sgnn7.ourobo.util.AsyncThumbnailDownloader;
 import org.sgnn7.ourobo.util.HttpUtils;
 import org.sgnn7.ourobo.util.JsonUtils;
 import org.sgnn7.ourobo.util.LogMe;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -27,12 +31,15 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewSwitcher;
 
 public class MainActivity extends Activity {
 	private static final String REDDIT_API_URI = "http://api.reddit.com";
 
 	private ProgressBar progressBar;
 	private ImageView refreshButton;
+
+	private final Set<AsyncThumbnailDownloader> runningDownloaders = new CopyOnWriteArraySet<AsyncThumbnailDownloader>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -46,6 +53,10 @@ public class MainActivity extends Activity {
 		refreshButton = (ImageView) findViewById(R.id.main_page);
 		refreshButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View view) {
+				for (AsyncThumbnailDownloader downloader : runningDownloaders) {
+					downloader.cancel(true);
+				}
+
 				progressBar.setVisibility(View.VISIBLE);
 
 				refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.refresh_hilight));
@@ -103,13 +114,16 @@ public class MainActivity extends Activity {
 		LinearLayout mainView = (LinearLayout) findViewById(R.id.posts_list);
 		mainView.removeAllViews();
 
+		Drawable viewImageThumbnail = getResources().getDrawable(R.drawable.view_image);
+
 		int index = 0;
 		for (final RedditPost redditPost : results) {
 			LogMe.d("Adding " + redditPost.getTitle());
 			View postHolder = layoutInflater.inflate(R.layout.post_layout, mainView, false);
 
 			TextView textView = (TextView) postHolder.findViewById(R.id.post_title);
-			textView.setText(redditPost.getTitle());
+			String title = sanitizeString(redditPost.getTitle().trim());
+			textView.setText(title);
 
 			final UrlFileType fileType = HttpUtils.getFileType(redditPost.getUrl());
 
@@ -121,16 +135,31 @@ public class MainActivity extends Activity {
 				}
 			});
 
-			ImageView thumbnail = (ImageView) postHolder.findViewById(R.id.post_thumbnail);
+			ViewSwitcher thumbnailHolder = (ViewSwitcher) postHolder.findViewById(R.id.post_thumbnail_holder);
 			if (fileType.equals(UrlFileType.IMAGE)) {
-				thumbnail.setImageDrawable(getResources().getDrawable(R.drawable.view_image));
+				AsyncThumbnailDownloader downloader = new AsyncThumbnailDownloader(REDDIT_API_URI, thumbnailHolder,
+						runningDownloaders, viewImageThumbnail, redditPost.getThumbnail(), redditPost.getUrl()
+								.toExternalForm());
+				runningDownloaders.add(downloader);
+				downloader.execute();
 			} else {
-				thumbnail.setImageDrawable(getResources().getDrawable(R.drawable.browse));
+				AsyncThumbnailDownloader downloader = new AsyncThumbnailDownloader(REDDIT_API_URI, thumbnailHolder,
+						runningDownloaders, null, redditPost.getThumbnail(), null);
+				runningDownloaders.add(downloader);
+				downloader.execute();
 			}
 
 			mainView.addView(postHolder);
 		}
 
+	}
+
+	private String sanitizeString(String text) {
+		String sanitizedText = "NULL";
+		if (text != null && text.length() != 0) {
+			sanitizedText = text;
+		}
+		return sanitizedText;
 	}
 
 	private Intent getIntentBasedOnFileType(final RedditPost redditPost, final UrlFileType fileType) {
@@ -141,9 +170,6 @@ public class MainActivity extends Activity {
 
 	private int getBackgroundIdBasedOnTypeAndIndex(UrlFileType fileType, int index) {
 		int backdgoundId = R.drawable.gray_post_style;
-		// if (fileType.equals(UrlFileType.IMAGE)) {
-		// backdgoundId = R.drawable.picture_post_style;
-		// } else if (index % 2 != 0) {
 		if (index % 2 != 0) {
 			backdgoundId = R.drawable.blue_post_style;
 		}

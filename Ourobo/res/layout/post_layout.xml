@@ -4,13 +4,20 @@
 	android:layout_height="wrap_content">
 	<RelativeLayout android:layout_width="wrap_content"
 		android:layout_height="fill_parent">
-		<ImageView android:id="@+id/post_thumbnail"
-			android:layout_width="50dip" android:layout_height="50dip"
-			android:padding="10dip" android:background="@android:color/transparent"
-			android:scaleType="fitCenter" android:layout_centerInParent="true" />
+		<ViewSwitcher android:id="@+id/post_thumbnail_holder"
+			android:layout_width="60dip" android:layout_height="60dip"
+			android:layout_centerInParent="true" android:paddingLeft="10dip"
+			android:paddingRight="0dip" android:paddingTop="5dip"
+			android:paddingBottom="10dip">
+			<ProgressBar android:layout_width="fill_parent"
+				android:layout_height="fill_parent" style="@android:style/Widget.ProgressBar.Inverse" />
+			<ImageView android:id="@+id/post_thumbnail"
+				android:layout_width="fill_parent" android:layout_height="fill_parent"
+				android:background="@android:color/transparent" android:scaleType="fitCenter" />
+		</ViewSwitcher>
 	</RelativeLayout>
 	<TextView android:id="@+id/post_title" android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:paddingLeft="10dip"
+		android:layout_height="wrap_content" android:paddingLeft="15dip"
 		android:paddingRight="10dip" android:paddingTop="30dip"
 		android:paddingBottom="30dip" android:gravity="center_vertical"
 		android:textColor="@color/post_text_color" android:background="@android:color/transparent" />

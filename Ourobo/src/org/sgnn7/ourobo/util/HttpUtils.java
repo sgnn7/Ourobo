@@ -25,6 +25,7 @@ public class HttpUtils {
 			LogMe.d(new String(pageContent));
 		} catch (Exception e) {
 			e.printStackTrace();
+			LogMe.e("Error while trying to retrieve '" + uri + "'");
 		}
 
 		LogMe.logTime(startTime, "retrieve the data from " + uri);
@@ -57,4 +58,14 @@ public class HttpUtils {
 		return extension.toLowerCase();
 	}
 
+	public static byte[] getBinaryPageContent(String host, String urlOrPath) {
+		byte[] content = null;
+		if (urlOrPath.startsWith("/")) {
+			content = getBinaryPageContent(host + urlOrPath);
+		} else {
+			content = getBinaryPageContent(urlOrPath);
+		}
+
+		return content;
+	}
 }
