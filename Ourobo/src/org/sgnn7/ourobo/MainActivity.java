@@ -75,6 +75,8 @@ public class MainActivity extends Activity {
 			}
 		});
 
+		// ListView scrollView = (ListView) findViewById(R.id.post_scroll_view);
+
 		new DownloadTask().execute(API_URL);
 	}
 

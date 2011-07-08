@@ -4,7 +4,7 @@
 	<LinearLayout android:orientation="vertical"
 		android:layout_width="fill_parent" android:layout_height="fill_parent"
 		android:layout_marginBottom="50dip">
-		<ScrollView android:id="@+id/stuff" android:layout_width="fill_parent"
+		<ScrollView android:id="@+id/post_scroll_view" android:layout_width="fill_parent"
 			android:layout_height="wrap_content">
 			<LinearLayout android:orientation="vertical"
 				android:layout_width="fill_parent" android:layout_height="wrap_content"

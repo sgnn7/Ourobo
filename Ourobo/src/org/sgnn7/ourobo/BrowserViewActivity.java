@@ -1,32 +1,37 @@
 package org.sgnn7.ourobo;
 
+import org.sgnn7.ourobo.eventing.IChangeEventListener;
+
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.View;
-import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.FrameLayout;
+import android.widget.ViewSwitcher;
 
 public class BrowserViewActivity extends Activity {
 	public static final String LOCATION = "image.location";
-
-	private static final FrameLayout.LayoutParams ZOOM_PARAMS = new FrameLayout.LayoutParams(
-			ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM);
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		String imageLocation = getIntent().getStringExtra(LOCATION);
+		String destinationUrl = getIntent().getStringExtra(LOCATION);
+
+		setContentView(R.layout.browser_page);
+
+		final ViewSwitcher viewSwitcher = (ViewSwitcher) findViewById(R.id.main_browser_view);
+
 		WebView webView = new WebView(this);
+		viewSwitcher.addView(webView);
 
-		setContentView(webView);
+		EventingWebViewClient client = new EventingWebViewClient();
+		client.addPageLoadedListener(new IChangeEventListener() {
+			public void handle() {
+				viewSwitcher.showNext();
+			}
+		});
 
-		FrameLayout webViewContent = (FrameLayout) getWindow().getDecorView().findViewById(android.R.id.content);
-		final View zoomControlsView = webView.getZoomControls();
-		webViewContent.addView(zoomControlsView, ZOOM_PARAMS);
+		webView.setWebViewClient(client);
 
 		WebSettings webSettings = webView.getSettings();
 		webSettings.setBuiltInZoomControls(true);
@@ -34,7 +39,6 @@ public class BrowserViewActivity extends Activity {
 		webSettings.setSupportZoom(true);
 		webView.setInitialScale(100);
 
-		webView.loadUrl(imageLocation);
-
+		webView.loadUrl(destinationUrl);
 	}
 }
