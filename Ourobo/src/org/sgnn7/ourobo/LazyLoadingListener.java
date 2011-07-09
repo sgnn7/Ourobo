@@ -21,9 +21,10 @@ public class LazyLoadingListener extends SimpleEventManager implements OnScrollL
 		LogMe.e("Last index: " + (lastVisibleItem + lazyLoaderThreshold));
 		LogMe.e("Threshold: " + totalItemCount);
 
-		if (isLoading) {
+		if (isLoading || totalItemCount == 0) {
 			return;
 		} else if (lastVisibleItem + lazyLoaderThreshold >= totalItemCount) {
+			LogMe.e("Notifying listeners");
 			notifyManagedListeners();
 			isLoading = true;
 		}

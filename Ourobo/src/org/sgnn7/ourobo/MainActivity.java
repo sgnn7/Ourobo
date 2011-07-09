@@ -12,6 +12,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.sgnn7.ourobo.data.RedditPost;
 import org.sgnn7.ourobo.data.UrlFileType;
+import org.sgnn7.ourobo.eventing.IChangeEventListener;
 import org.sgnn7.ourobo.util.AsyncThumbnailDownloader;
 import org.sgnn7.ourobo.util.HttpUtils;
 import org.sgnn7.ourobo.util.JsonUtils;
@@ -25,9 +26,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -50,6 +53,9 @@ public class MainActivity extends Activity {
 	private ProgressBar progressBar;
 	private ImageView refreshButton;
 
+	private RedditPostAdapter redditPostAdapter;
+	private LazyLoadingListener lazyLoadingListener;
+
 	private final Set<AsyncThumbnailDownloader> runningDownloaders = new CopyOnWriteArraySet<AsyncThumbnailDownloader>();
 
 	@Override
@@ -61,6 +67,20 @@ public class MainActivity extends Activity {
 
 		progressBar = (ProgressBar) findViewById(R.id.loading_view);
 
+		ListView postView = (ListView) findViewById(R.id.posts_list);
+
+		redditPostAdapter = new RedditPostAdapter();
+		postView.setAdapter(redditPostAdapter);
+
+		lazyLoadingListener = new LazyLoadingListener(5);
+		lazyLoadingListener.addLazyLoaderEventListener(new IChangeEventListener() {
+			public void handle() {
+				LogMe.e("Trying to download stuffs");
+				new DownloadTask().execute(API_URL);
+			}
+		});
+		postView.setOnScrollListener(lazyLoadingListener);
+
 		refreshButton = (ImageView) findViewById(R.id.main_page);
 		refreshButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View view) {
@@ -71,13 +91,12 @@ public class MainActivity extends Activity {
 				refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.refresh_hilight));
 
 				refreshButton.setEnabled(false);
-				new DownloadTask().execute(API_URL);
+
+				redditPostAdapter.refreshViews();
 			}
 		});
 
-		// ListView scrollView = (ListView) findViewById(R.id.post_scroll_view);
-
-		new DownloadTask().execute(API_URL);
+		redditPostAdapter.refreshViews();
 	}
 
 	private class DownloadTask extends AsyncTask<String, Void, List<RedditPost>> {
@@ -116,14 +135,15 @@ public class MainActivity extends Activity {
 			progressBar.setVisibility(View.INVISIBLE);
 			refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.refresh));
 			refreshButton.setEnabled(true);
+
+			lazyLoadingListener.contentLoaded();
 		}
 
 	}
 
 	private void addPostsToMainPage(List<RedditPost> results) {
 		LayoutInflater layoutInflater = getLayoutInflater();
-		LinearLayout mainView = (LinearLayout) findViewById(R.id.posts_list);
-		mainView.removeAllViews();
+		ListView mainView = (ListView) findViewById(R.id.posts_list);
 
 		Drawable viewImageThumbnail = getResources().getDrawable(R.drawable.view_image);
 
@@ -180,7 +200,7 @@ public class MainActivity extends Activity {
 			TextView scoreView = (TextView) scoreHolder.findViewById(R.id.post_score);
 			scoreView.setText("" + redditPost.getScore());
 
-			mainView.addView(postHolder);
+			redditPostAdapter.addView(postHolder);
 		}
 	}
 
@@ -214,5 +234,34 @@ public class MainActivity extends Activity {
 			sanitizedText = text;
 		}
 		return sanitizedText;
+	}
+
+	public class RedditPostAdapter extends BaseAdapter {
+		List<View> views = new ArrayList<View>();
+
+		public int getCount() {
+			return views.size();
+		}
+
+		public Object getItem(int position) {
+			return position;
+		}
+
+		public long getItemId(int position) {
+			return position;
+		}
+
+		public View getView(int position, View convertView, ViewGroup parent) {
+			return views.get(position);
+		}
+
+		public void addView(View view) {
+			views.add(view);
+		}
+
+		public void refreshViews() {
+			views.clear();
+			new DownloadTask().execute(API_URL);
+		}
 	}
 }

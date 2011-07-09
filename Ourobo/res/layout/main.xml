@@ -4,16 +4,8 @@
 	<LinearLayout android:orientation="vertical"
 		android:layout_width="fill_parent" android:layout_height="fill_parent"
 		android:layout_marginBottom="50dip">
-		<ScrollView android:id="@+id/post_scroll_view" android:layout_width="fill_parent"
-			android:layout_height="wrap_content">
-			<LinearLayout android:orientation="vertical"
-				android:layout_width="fill_parent" android:layout_height="wrap_content"
-				android:id="@+id/posts_list">
-				<TextView android:layout_width="fill_parent"
-					android:layout_height="wrap_content" android:gravity="center"
-					android:text="Refreshing..." />
-			</LinearLayout>
-		</ScrollView>
+		<ListView android:layout_width="fill_parent"
+			android:layout_height="wrap_content" android:id="@+id/posts_list" />
 	</LinearLayout>
 	<ImageView android:layout_width="fill_parent"
 		android:layout_height="50dip" android:src="@drawable/refresh"
