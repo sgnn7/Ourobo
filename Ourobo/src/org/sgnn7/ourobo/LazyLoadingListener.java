@@ -18,8 +18,8 @@ public class LazyLoadingListener extends SimpleEventManager implements OnScrollL
 
 	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
 		int lastVisibleItem = firstVisibleItem + visibleItemCount;
-		LogMe.e("Last index: " + (lastVisibleItem + lazyLoaderThreshold));
-		LogMe.e("Threshold: " + totalItemCount);
+		LogMe.d("Last index: " + (lastVisibleItem + lazyLoaderThreshold));
+		LogMe.d("Threshold: " + totalItemCount);
 
 		if (isLoading || totalItemCount == 0) {
 			return;

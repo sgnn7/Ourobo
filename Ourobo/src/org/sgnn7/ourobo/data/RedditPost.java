@@ -5,7 +5,7 @@ import java.net.URL;
 public class RedditPost {
 	private int score;
 	private String title;
-	private String id;
+	private String name;
 	private URL url;
 	private String permalink;
 	private int num_comments;
@@ -25,14 +25,6 @@ public class RedditPost {
 
 	public void setTitle(String title) {
 		this.title = title;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
 	}
 
 	public URL getUrl() {
@@ -65,5 +57,13 @@ public class RedditPost {
 
 	public void setThumbnail(String thumbnail) {
 		this.thumbnail = thumbnail;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 }

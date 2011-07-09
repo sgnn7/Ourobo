@@ -2,7 +2,9 @@ package org.sgnn7.ourobo;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -38,16 +40,23 @@ import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 public class MainActivity extends Activity {
+
 	private static final String REDDIT_HOST = "reddit.com";
+
+	private static final String PARAMETER_SEPARATOR = "&";
+
+	private static final int DEFAULT_POST_COUNT = 12;
+	private static final String DEFAULT_SORTING_TYPE = "new";
 
 	private static final String HTTP_PROTOCOL_PREFIX = "http://";
 
 	private static final String MAIN_SUBDOMAIN = "www.";
-	private static final String API_SUBDOMAIN = "api.";
+	private static final String JSON_SUBDOMAIN = "json.";
 	private static final String MOBILE_SUBDOMAIN = "i.";
+	private static final String JSON_PATH_SUFFIX = "/.json";
 
 	private static final String MAIN_URL = HTTP_PROTOCOL_PREFIX + MAIN_SUBDOMAIN + REDDIT_HOST;
-	private static final String API_URL = HTTP_PROTOCOL_PREFIX + API_SUBDOMAIN + REDDIT_HOST;
+	private static final String JSON_URL = HTTP_PROTOCOL_PREFIX + JSON_SUBDOMAIN + REDDIT_HOST + JSON_PATH_SUFFIX;
 	private static final String MOBILE_URL = HTTP_PROTOCOL_PREFIX + MOBILE_SUBDOMAIN + REDDIT_HOST;
 
 	private ProgressBar progressBar;
@@ -75,8 +84,8 @@ public class MainActivity extends Activity {
 		lazyLoadingListener = new LazyLoadingListener(5);
 		lazyLoadingListener.addLazyLoaderEventListener(new IChangeEventListener() {
 			public void handle() {
-				LogMe.e("Trying to download stuffs");
-				new DownloadTask().execute(API_URL);
+				LogMe.i("Lazy loading more content...");
+				new DownloadTask().execute(JSON_URL, getParameterString(redditPostAdapter));
 			}
 		});
 		postView.setOnScrollListener(lazyLoadingListener);
@@ -104,7 +113,9 @@ public class MainActivity extends Activity {
 		protected List<RedditPost> doInBackground(String... params) {
 			List<RedditPost> posts = new ArrayList<RedditPost>();
 			try {
-				String pageContent = HttpUtils.getPageContent(params[0]);
+				String getParameters = params.length < 2 ? "" : params[1];
+
+				String pageContent = HttpUtils.getPageContent(params[0] + getParameters);
 				posts = getRedditPostsFromContent(pageContent);
 				LogMe.e("Posts: " + posts.size());
 			} catch (Exception e) {
@@ -128,7 +139,7 @@ public class MainActivity extends Activity {
 			if (!results.isEmpty()) {
 				addPostsToMainPage(results);
 			} else {
-				Toast.makeText(MainActivity.this, "Could not retrieve results from " + API_URL, Toast.LENGTH_LONG)
+				Toast.makeText(MainActivity.this, "Could not retrieve results from " + JSON_URL, Toast.LENGTH_LONG)
 						.show();
 			}
 
@@ -171,13 +182,13 @@ public class MainActivity extends Activity {
 
 			boolean isImageUrl = fileType.equals(UrlFileType.IMAGE);
 			if (isImageUrl) {
-				AsyncThumbnailDownloader downloader = new AsyncThumbnailDownloader(API_URL, thumbnailHolder,
+				AsyncThumbnailDownloader downloader = new AsyncThumbnailDownloader(MAIN_URL, thumbnailHolder,
 						runningDownloaders, viewImageThumbnail, redditPost.getThumbnail(), redditPost.getUrl()
 								.toExternalForm());
 				runningDownloaders.add(downloader);
 				downloader.execute();
 			} else {
-				AsyncThumbnailDownloader downloader = new AsyncThumbnailDownloader(API_URL, thumbnailHolder,
+				AsyncThumbnailDownloader downloader = new AsyncThumbnailDownloader(MAIN_URL, thumbnailHolder,
 						runningDownloaders, null, redditPost.getThumbnail(), null);
 				runningDownloaders.add(downloader);
 				downloader.execute();
@@ -200,7 +211,7 @@ public class MainActivity extends Activity {
 			TextView scoreView = (TextView) scoreHolder.findViewById(R.id.post_score);
 			scoreView.setText("" + redditPost.getScore());
 
-			redditPostAdapter.addView(postHolder);
+			redditPostAdapter.addView(postHolder, redditPost.getName());
 		}
 	}
 
@@ -237,10 +248,11 @@ public class MainActivity extends Activity {
 	}
 
 	public class RedditPostAdapter extends BaseAdapter {
-		List<View> views = new ArrayList<View>();
+		List<String> redditPostIds = new ArrayList<String>();
+		Map<String, View> postIdToViewMap = new HashMap<String, View>();
 
 		public int getCount() {
-			return views.size();
+			return redditPostIds.size();
 		}
 
 		public Object getItem(int position) {
@@ -252,16 +264,43 @@ public class MainActivity extends Activity {
 		}
 
 		public View getView(int position, View convertView, ViewGroup parent) {
-			return views.get(position);
+			return postIdToViewMap.get(redditPostIds.get(position));
 		}
 
-		public void addView(View view) {
-			views.add(view);
+		public void addView(View view, String redditPostId) {
+			redditPostIds.add(redditPostId);
+			postIdToViewMap.put(redditPostId, view);
 		}
 
 		public void refreshViews() {
-			views.clear();
-			new DownloadTask().execute(API_URL);
+			redditPostIds.clear();
+			postIdToViewMap.clear();
+
+			new DownloadTask().execute(JSON_URL, getParameterString(this));
 		}
+
+		public String getLastPostId() {
+			return redditPostIds.get(redditPostIds.size() - 1);
+		}
+	}
+
+	private String getParameterString(RedditPostAdapter adapter) {
+		Map<String, String> parameters = new HashMap<String, String>();
+		parameters.put("limit", "" + DEFAULT_POST_COUNT);
+		parameters.put("sort", DEFAULT_SORTING_TYPE);
+
+		if (adapter.getCount() != 0) {
+			parameters.put("after", adapter.getLastPostId());
+		}
+
+		String parameterString = "";
+		for (String parameterKey : parameters.keySet()) {
+			parameterString += PARAMETER_SEPARATOR + parameterKey + "=" + parameters.get(parameterKey);
+		}
+		parameterString = "?" + parameterString.substring(1);
+
+		LogMe.e("Parameters: " + parameterString);
+
+		return parameterString;
 	}
 }
