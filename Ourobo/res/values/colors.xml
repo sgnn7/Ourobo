@@ -5,5 +5,6 @@
     <color name="post_text_color">#666</color>
     <color name="score_color">#888</color>
     <color name="white">#FFF</color>
+    <color name="black">#000</color>
     <color name="post_border">#C6BFB9</color>
 </resources>

@@ -22,12 +22,15 @@ public class BrowserViewActivity extends Activity {
 		final ViewSwitcher viewSwitcher = (ViewSwitcher) findViewById(R.id.main_browser_view);
 
 		WebView webView = new WebView(this);
+		webView.setBackgroundColor(R.color.black);
 		viewSwitcher.addView(webView);
 
 		EventingWebViewClient client = new EventingWebViewClient();
 		client.addPageLoadedListener(new IChangeEventListener() {
 			public void handle() {
-				viewSwitcher.showNext();
+				if (!(viewSwitcher.getCurrentView() instanceof WebView)) {
+					viewSwitcher.showNext();
+				}
 			}
 		});
 
