@@ -22,6 +22,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -62,7 +65,6 @@ public class MainActivity extends Activity {
 
 	private ProgressBar progressBar;
 	private ListView postView;
-	private ImageView refreshButton;
 
 	private RedditPostAdapter redditPostAdapter;
 	private LazyLoadingListener lazyLoadingListener;
@@ -90,18 +92,26 @@ public class MainActivity extends Activity {
 		});
 		postView.setOnScrollListener(lazyLoadingListener);
 
-		refreshButton = (ImageView) findViewById(R.id.main_page);
-		refreshButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View view) {
-				stopAllDownloads();
-				progressBar.setVisibility(View.VISIBLE);
-				refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.refresh_hilight));
-				refreshButton.setEnabled(false);
-				redditPostAdapter.refreshViews();
-			}
-		});
-
 		redditPostAdapter.refreshViews();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.main_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.menu_refresh:
+			redditPostAdapter.refreshViews();
+			stopAllDownloads();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 	private class DownloadTask extends AsyncTask<String, Void, List<RedditPost>> {
@@ -140,9 +150,6 @@ public class MainActivity extends Activity {
 			}
 
 			progressBar.setVisibility(View.INVISIBLE);
-			refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.refresh));
-			refreshButton.setEnabled(true);
-
 			lazyLoadingListener.contentLoaded();
 		}
 
@@ -250,8 +257,8 @@ public class MainActivity extends Activity {
 		ViewSwitcher thumbnailHolder = (ViewSwitcher) postHolder.findViewById(R.id.post_thumbnail_holder);
 		final ImageView thumbnail = (ImageView) thumbnailHolder.findViewById(R.id.post_thumbnail);
 
-		AsyncThumbnailLoader thumbnailLazyLoader = new AsyncThumbnailLoader(this, postHolder, thumbnailHolder, thumbnail,
-				REDDIT_HOST);
+		AsyncThumbnailLoader thumbnailLazyLoader = new AsyncThumbnailLoader(this, postHolder, thumbnailHolder,
+				thumbnail, REDDIT_HOST);
 		if (isImageUrl) {
 			thumbnailLazyLoader.loadImage(redditPost.getUrl().toExternalForm());
 		} else {

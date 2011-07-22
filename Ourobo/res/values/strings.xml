@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Ourobo</string>
-    <string name="reload_posts">Reload</string>
+    <string name="menu_refresh">Refresh</string>
 </resources>
