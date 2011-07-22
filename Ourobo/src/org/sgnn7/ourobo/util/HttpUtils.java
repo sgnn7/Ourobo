@@ -23,6 +23,9 @@ public class HttpUtils {
 			pageContent = IOUtils.toByteArray(response.getEntity().getContent());
 			LogMe.d("Size: " + pageContent.length);
 			LogMe.d(new String(pageContent));
+		} catch (OutOfMemoryError oome) {
+			System.gc();
+			LogMe.e("Cleaned garbage");
 		} catch (Exception e) {
 			e.printStackTrace();
 			LogMe.e("Error while trying to retrieve '" + uri + "'");

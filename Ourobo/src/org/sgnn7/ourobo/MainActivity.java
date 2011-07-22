@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
@@ -15,17 +13,15 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.sgnn7.ourobo.data.RedditPost;
 import org.sgnn7.ourobo.data.UrlFileType;
 import org.sgnn7.ourobo.eventing.IChangeEventListener;
-import org.sgnn7.ourobo.util.AsyncThumbnailDownloader;
 import org.sgnn7.ourobo.util.HttpUtils;
+import org.sgnn7.ourobo.util.ImageCacheManager;
 import org.sgnn7.ourobo.util.JsonUtils;
 import org.sgnn7.ourobo.util.LogMe;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -59,13 +55,17 @@ public class MainActivity extends Activity {
 	private static final String JSON_URL = HTTP_PROTOCOL_PREFIX + JSON_SUBDOMAIN + REDDIT_HOST + JSON_PATH_SUFFIX;
 	private static final String MOBILE_URL = HTTP_PROTOCOL_PREFIX + MOBILE_SUBDOMAIN + REDDIT_HOST;
 
+	// private static final String DEBUG_SERVER = "192.168.3.70:8080";
+	// private static final String MAIN_URL = HTTP_PROTOCOL_PREFIX + DEBUG_SERVER + "/RedditService/RedditService";
+	// private static final String JSON_URL = HTTP_PROTOCOL_PREFIX + DEBUG_SERVER + "/RedditService/RedditService";
+	// private static final String MOBILE_URL = HTTP_PROTOCOL_PREFIX + DEBUG_SERVER + "/RedditService/RedditService";
+
 	private ProgressBar progressBar;
+	private ListView postView;
 	private ImageView refreshButton;
 
 	private RedditPostAdapter redditPostAdapter;
 	private LazyLoadingListener lazyLoadingListener;
-
-	private final Set<AsyncThumbnailDownloader> runningDownloaders = new CopyOnWriteArraySet<AsyncThumbnailDownloader>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -76,7 +76,7 @@ public class MainActivity extends Activity {
 
 		progressBar = (ProgressBar) findViewById(R.id.loading_view);
 
-		ListView postView = (ListView) findViewById(R.id.posts_list);
+		postView = (ListView) findViewById(R.id.posts_list);
 
 		redditPostAdapter = new RedditPostAdapter();
 		postView.setAdapter(redditPostAdapter);
@@ -94,13 +94,9 @@ public class MainActivity extends Activity {
 		refreshButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View view) {
 				stopAllDownloads();
-
 				progressBar.setVisibility(View.VISIBLE);
-
 				refreshButton.setImageDrawable(getResources().getDrawable(R.drawable.refresh_hilight));
-
 				refreshButton.setEnabled(false);
-
 				redditPostAdapter.refreshViews();
 			}
 		});
@@ -137,7 +133,7 @@ public class MainActivity extends Activity {
 		@Override
 		protected void onPostExecute(List<RedditPost> results) {
 			if (!results.isEmpty()) {
-				addPostsToMainPage(results);
+				redditPostAdapter.addPosts(results);
 			} else {
 				Toast.makeText(MainActivity.this, "Could not retrieve results from " + JSON_URL, Toast.LENGTH_LONG)
 						.show();
@@ -150,69 +146,6 @@ public class MainActivity extends Activity {
 			lazyLoadingListener.contentLoaded();
 		}
 
-	}
-
-	private void addPostsToMainPage(List<RedditPost> results) {
-		LayoutInflater layoutInflater = getLayoutInflater();
-		ListView mainView = (ListView) findViewById(R.id.posts_list);
-
-		Drawable viewImageThumbnail = getResources().getDrawable(R.drawable.view_image);
-
-		int index = 0;
-		for (final RedditPost redditPost : results) {
-			LogMe.d("Adding " + redditPost.getTitle());
-			View postHolder = layoutInflater.inflate(R.layout.post_layout, mainView, false);
-
-			TextView textView = (TextView) postHolder.findViewById(R.id.post_title);
-			String title = sanitizeString(redditPost.getTitle().trim());
-			textView.setText(title);
-
-			final UrlFileType fileType = HttpUtils.getFileType(redditPost.getUrl());
-
-			postHolder.setBackgroundDrawable(getResources().getDrawable(
-					getBackgroundIdBasedOnTypeAndIndex(fileType, index++)));
-			postHolder.setOnClickListener(new OnClickListener() {
-				public void onClick(View v) {
-					stopAllDownloads();
-					startActivity(getIntentBasedOnFileType(redditPost, fileType));
-				}
-			});
-
-			ViewSwitcher thumbnailHolder = (ViewSwitcher) postHolder.findViewById(R.id.post_thumbnail_holder);
-
-			boolean isImageUrl = fileType.equals(UrlFileType.IMAGE);
-			if (isImageUrl) {
-				AsyncThumbnailDownloader downloader = new AsyncThumbnailDownloader(MAIN_URL, thumbnailHolder,
-						runningDownloaders, viewImageThumbnail, redditPost.getThumbnail(), redditPost.getUrl()
-								.toExternalForm());
-				runningDownloaders.add(downloader);
-				downloader.execute();
-			} else {
-				AsyncThumbnailDownloader downloader = new AsyncThumbnailDownloader(MAIN_URL, thumbnailHolder,
-						runningDownloaders, null, redditPost.getThumbnail(), null);
-				runningDownloaders.add(downloader);
-				downloader.execute();
-			}
-
-			RelativeLayout scoreHolder = (RelativeLayout) postHolder.findViewById(R.id.post_score_holder);
-			scoreHolder.setOnClickListener(new OnClickListener() {
-				public void onClick(View v) {
-					stopAllDownloads();
-
-					String commentsUrl = MOBILE_URL + redditPost.getPermalink();
-					LogMe.e("Opening comments at: " + commentsUrl);
-
-					Intent targetIntent = new Intent(MainActivity.this, BrowserViewActivity.class);
-					targetIntent.putExtra(BrowserViewActivity.LOCATION, commentsUrl);
-					startActivity(targetIntent);
-				}
-			});
-
-			TextView scoreView = (TextView) scoreHolder.findViewById(R.id.post_score);
-			scoreView.setText("" + redditPost.getScore());
-
-			redditPostAdapter.addView(postHolder, redditPost.getName());
-		}
 	}
 
 	private Intent getIntentBasedOnFileType(final RedditPost redditPost, final UrlFileType fileType) {
@@ -234,9 +167,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void stopAllDownloads() {
-		for (AsyncThumbnailDownloader downloader : runningDownloaders) {
-			downloader.cancel(true);
-		}
+		ImageCacheManager.stopDownloads();
 	}
 
 	private String sanitizeString(String text) {
@@ -248,15 +179,16 @@ public class MainActivity extends Activity {
 	}
 
 	public class RedditPostAdapter extends BaseAdapter {
-		List<String> redditPostIds = new ArrayList<String>();
-		Map<String, View> postIdToViewMap = new HashMap<String, View>();
+		final List<RedditPost> redditPosts = new ArrayList<RedditPost>();
 
 		public int getCount() {
-			return redditPostIds.size();
+			int numberOfPosts;
+			numberOfPosts = redditPosts.size();
+			return numberOfPosts;
 		}
 
 		public Object getItem(int position) {
-			return position;
+			return redditPosts.get(position);
 		}
 
 		public long getItemId(int position) {
@@ -264,24 +196,84 @@ public class MainActivity extends Activity {
 		}
 
 		public View getView(int position, View convertView, ViewGroup parent) {
-			return postIdToViewMap.get(redditPostIds.get(position));
+			RedditPost redditPost = redditPosts.get(position);
+
+			View redditPostHolder = null;
+			// if (convertView == null) {
+			LogMe.e("Creating view: " + redditPost.getTitle());
+			redditPostHolder = getLayoutInflater().inflate(R.layout.post_layout, parent, false);
+			// } else {
+			// redditPostHolder = convertView;
+			// }
+
+			setPostHolderValues(position, redditPost, redditPostHolder);
+			redditPostHolder.invalidate();
+			return redditPostHolder;
 		}
 
-		public void addView(View view, String redditPostId) {
-			redditPostIds.add(redditPostId);
-			postIdToViewMap.put(redditPostId, view);
+		public void addPosts(final List<RedditPost> newRedditPosts) {
+			redditPosts.addAll(newRedditPosts);
+			LogMe.e("Posts set. Add Size: " + newRedditPosts.size() + ". Total: " + redditPosts.size());
+			notifyDataSetChanged();
 		}
 
 		public void refreshViews() {
-			redditPostIds.clear();
-			postIdToViewMap.clear();
+			LogMe.e("Clearing view");
+			redditPosts.clear();
 
 			new DownloadTask().execute(JSON_URL, getParameterString(this));
 		}
 
 		public String getLastPostId() {
-			return redditPostIds.get(redditPostIds.size() - 1);
+			return redditPosts.get(redditPosts.size() - 1).getName();
 		}
+	}
+
+	private void setPostHolderValues(int index, final RedditPost redditPost, View postHolder) {
+		TextView titleView = (TextView) postHolder.findViewById(R.id.post_title);
+		String title = sanitizeString(redditPost.getTitle().trim());
+		titleView.setText(title);
+
+		final UrlFileType fileType = HttpUtils.getFileType(redditPost.getUrl());
+
+		postHolder.setBackgroundDrawable(getResources()
+				.getDrawable(getBackgroundIdBasedOnTypeAndIndex(fileType, index)));
+		postHolder.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				stopAllDownloads();
+				startActivity(getIntentBasedOnFileType(redditPost, fileType));
+			}
+		});
+
+		boolean isImageUrl = fileType.equals(UrlFileType.IMAGE);
+
+		ViewSwitcher thumbnailHolder = (ViewSwitcher) postHolder.findViewById(R.id.post_thumbnail_holder);
+		final ImageView thumbnail = (ImageView) thumbnailHolder.findViewById(R.id.post_thumbnail);
+
+		AsyncThumbnailLoader thumbnailLazyLoader = new AsyncThumbnailLoader(this, postHolder, thumbnailHolder, thumbnail,
+				REDDIT_HOST);
+		if (isImageUrl) {
+			thumbnailLazyLoader.loadImage(redditPost.getUrl().toExternalForm());
+		} else {
+			thumbnailLazyLoader.loadImage(redditPost.getThumbnail());
+		}
+
+		RelativeLayout scoreHolder = (RelativeLayout) postHolder.findViewById(R.id.post_score_holder);
+		scoreHolder.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				stopAllDownloads();
+
+				String commentsUrl = MOBILE_URL + redditPost.getPermalink();
+				LogMe.e("Opening comments at: " + commentsUrl);
+
+				Intent targetIntent = new Intent(MainActivity.this, BrowserViewActivity.class);
+				targetIntent.putExtra(BrowserViewActivity.LOCATION, commentsUrl);
+				startActivity(targetIntent);
+			}
+		});
+
+		TextView scoreView = (TextView) scoreHolder.findViewById(R.id.post_score);
+		scoreView.setText("" + redditPost.getScore());
 	}
 
 	private String getParameterString(RedditPostAdapter adapter) {
@@ -299,7 +291,7 @@ public class MainActivity extends Activity {
 		}
 		parameterString = "?" + parameterString.substring(1);
 
-		LogMe.e("Parameters: " + parameterString);
+		LogMe.d("Parameters: " + parameterString);
 
 		return parameterString;
 	}
