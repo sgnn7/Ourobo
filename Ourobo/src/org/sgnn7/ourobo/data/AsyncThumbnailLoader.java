@@ -1,4 +1,4 @@
-package org.sgnn7.ourobo;
+package org.sgnn7.ourobo.data;
 
 import org.sgnn7.ourobo.eventing.IImageLoadedListener;
 import org.sgnn7.ourobo.util.ImageCacheManager;
