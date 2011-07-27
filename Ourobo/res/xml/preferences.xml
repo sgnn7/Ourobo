@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory 
+        android:title="Credentials"
+        android:key="main_preferences">
+
+        <EditTextPreference
+            android:key="preference_username"
+            android:title="Username" 
+            android:summary="Your reddit username"
+            android:dialogTitle="Username"
+            android:dialogMessage="Edit your username"    
+            android:defaultValue="" />
+            
+        <EditTextPreference
+            android:key="preference_password"
+            android:title="Password" 
+            android:summary="Your reddit password"
+            android:dialogTitle="Password"
+            android:password="true" 
+            android:dialogMessage="Edit your password"    
+            android:defaultValue="" />            
+    </PreferenceCategory>
+</PreferenceScreen>

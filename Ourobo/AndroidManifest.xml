@@ -15,5 +15,8 @@
 		<activity android:name="BrowserViewActivity" android:label="BrowserView"
 			android:multiprocess="true" android:configChanges="orientation|keyboardHidden"
 			android:theme="@android:style/Theme.Black.NoTitleBar" />
+		<activity android:name="AppPreferenceActivity"
+			android:multiprocess="true" android:configChanges="orientation|keyboardHidden"
+			android:theme="@android:style/Theme.Black.NoTitleBar" />
 	</application>
 </manifest>

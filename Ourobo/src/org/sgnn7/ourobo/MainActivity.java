@@ -2,12 +2,14 @@ package org.sgnn7.ourobo;
 
 import java.util.List;
 
-import org.sgnn7.ourobo.data.DownloadTask;
+import org.sgnn7.ourobo.data.DownloadTaskFactory;
 import org.sgnn7.ourobo.data.RedditPost;
 import org.sgnn7.ourobo.data.RedditPostAdapter;
 import org.sgnn7.ourobo.eventing.IChangeEventListener;
+import org.sgnn7.ourobo.eventing.LazyLoadingListener;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,14 +31,14 @@ public class MainActivity extends Activity {
 	private static final String MOBILE_SUBDOMAIN = "i.";
 	private static final String JSON_PATH_SUFFIX = "/.json";
 
-	private static final String MAIN_URL = HTTP_PROTOCOL_PREFIX + MAIN_SUBDOMAIN + REDDIT_HOST;
-	private static final String JSON_URL = HTTP_PROTOCOL_PREFIX + JSON_SUBDOMAIN + REDDIT_HOST + JSON_PATH_SUFFIX;
-	private static final String MOBILE_URL = HTTP_PROTOCOL_PREFIX + MOBILE_SUBDOMAIN + REDDIT_HOST;
+	// private static final String MAIN_URL = HTTP_PROTOCOL_PREFIX + MAIN_SUBDOMAIN + REDDIT_HOST;
+	// private static final String JSON_URL = HTTP_PROTOCOL_PREFIX + JSON_SUBDOMAIN + REDDIT_HOST + JSON_PATH_SUFFIX;
+	// private static final String MOBILE_URL = HTTP_PROTOCOL_PREFIX + MOBILE_SUBDOMAIN + REDDIT_HOST;
 
-	// private static final String DEBUG_SERVER = "192.168.3.70:8080";
-	// private static final String MAIN_URL = HTTP_PROTOCOL_PREFIX + DEBUG_SERVER + "/RedditService/RedditService";
-	// private static final String JSON_URL = HTTP_PROTOCOL_PREFIX + DEBUG_SERVER + "/RedditService/RedditService";
-	// private static final String MOBILE_URL = HTTP_PROTOCOL_PREFIX + DEBUG_SERVER + "/RedditService/RedditService";
+	private static final String DEBUG_SERVER = "192.168.3.70:8080";
+	private static final String MAIN_URL = HTTP_PROTOCOL_PREFIX + DEBUG_SERVER + "/RedditService/RedditService";
+	private static final String JSON_URL = HTTP_PROTOCOL_PREFIX + DEBUG_SERVER + "/RedditService/RedditService";
+	private static final String MOBILE_URL = HTTP_PROTOCOL_PREFIX + DEBUG_SERVER + "/RedditService/RedditService";
 
 	private ProgressBar progressBar;
 	private ListView postView;
@@ -44,7 +46,7 @@ public class MainActivity extends Activity {
 	private RedditPostAdapter redditPostAdapter;
 	private LazyLoadingListener lazyLoadingListener;
 
-	private DownloadTask downloadTask;
+	private DownloadTaskFactory downloadTaskFactory;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -52,9 +54,9 @@ public class MainActivity extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
 
-		downloadTask = new DownloadTask() {
+		downloadTaskFactory = new DownloadTaskFactory() {
 			@Override
-			protected void onPostExecute(List<RedditPost> results) {
+			protected void onPostExecuteDownloadTask(List<RedditPost> results) {
 				if (!results.isEmpty()) {
 					redditPostAdapter.addPosts(results);
 				} else {
@@ -83,7 +85,7 @@ public class MainActivity extends Activity {
 
 	private void attachListAdapterToListView(String subreddit) {
 		postView = (ListView) findViewById(R.id.posts_list);
-		redditPostAdapter = new RedditPostAdapter(this, downloadTask, JSON_URL, MAIN_URL, MOBILE_URL);
+		redditPostAdapter = new RedditPostAdapter(this, downloadTaskFactory, JSON_URL, MAIN_URL, MOBILE_URL);
 		postView.setAdapter(redditPostAdapter);
 	}
 
@@ -104,6 +106,9 @@ public class MainActivity extends Activity {
 		case R.id.menu_switch_subreddit:
 			Toast.makeText(this, "Not implemented yet", Toast.LENGTH_LONG).show();
 			// attachListAdapterToListView("xyz");
+		case R.id.menu_preferences:
+			Intent preferenceActivity = new Intent(getBaseContext(), AppPreferenceActivity.class);
+			startActivity(preferenceActivity);
 		default:
 			return super.onOptionsItemSelected(item);
 		}

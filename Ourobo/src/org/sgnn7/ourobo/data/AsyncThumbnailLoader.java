@@ -45,7 +45,7 @@ public class AsyncThumbnailLoader {
 				}
 			};
 
-			LogMe.e("Loading image " + imageUrl);
+			LogMe.i("Loading image " + imageUrl);
 			ImageCacheManager.getImage(host, imageUrl, imageLoadedListener);
 		} else {
 			thumbnailHolder.setVisibility(View.GONE);

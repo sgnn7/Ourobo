@@ -1,7 +1,5 @@
-package org.sgnn7.ourobo;
+package org.sgnn7.ourobo.eventing;
 
-import org.sgnn7.ourobo.eventing.IChangeEventListener;
-import org.sgnn7.ourobo.eventing.SimpleEventManager;
 import org.sgnn7.ourobo.util.LogMe;
 
 import android.widget.AbsListView;

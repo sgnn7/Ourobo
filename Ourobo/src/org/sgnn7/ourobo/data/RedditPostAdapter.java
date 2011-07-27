@@ -30,17 +30,17 @@ public class RedditPostAdapter extends BaseAdapter {
 
 	private final List<RedditPost> redditPosts = new ArrayList<RedditPost>();
 
-	private final DownloadTask downloadTask;
+	private final DownloadTaskFactory downloadTaskFactory;
 	private final Activity activity;
 
 	private final String dataLocationUri;
 	private final String mainUrl;
 	private final String mobileUrl;
 
-	public RedditPostAdapter(Activity activity, DownloadTask downloadTask, String dataLocationUri, String mainUrl,
-			String mobileUrl) {
+	public RedditPostAdapter(Activity activity, DownloadTaskFactory downloadTaskFactory, String dataLocationUri,
+			String mainUrl, String mobileUrl) {
 		this.activity = activity;
-		this.downloadTask = downloadTask;
+		this.downloadTaskFactory = downloadTaskFactory;
 		this.dataLocationUri = dataLocationUri;
 		this.mainUrl = mainUrl;
 		this.mobileUrl = mobileUrl;
@@ -87,12 +87,12 @@ public class RedditPostAdapter extends BaseAdapter {
 		LogMe.e("Clearing view");
 		redditPosts.clear();
 
-		downloadTask.execute(dataLocationUri, getParameterString());
+		downloadTaskFactory.newDownloadTask().execute(dataLocationUri, getParameterString());
 	}
 
 	public void downloadMoreContent() {
 		LogMe.i("Lazy loading more content...");
-		downloadTask.execute(dataLocationUri, getParameterString());
+		downloadTaskFactory.newDownloadTask().execute(dataLocationUri, getParameterString());
 	}
 
 	public String getLastPostId() {

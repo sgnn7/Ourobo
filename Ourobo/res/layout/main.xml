@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent" android:layout_height="fill_parent">
+	android:layout_width="fill_parent" android:layout_height="fill_parent" android:background="@drawable/blue_post_style">
 	<LinearLayout android:orientation="vertical"
 		android:layout_width="fill_parent" android:layout_height="fill_parent">
+		<RelativeLayout android:layout_width="fill_parent"
+			android:layout_height="wrap_content" android:layout_marginBottom="10dip" >
+			<LinearLayout android:orientation="horizontal"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:background="@drawable/subreddit_style" android:padding="10dip"
+				android:layout_margin="10dip" android:layout_alignParentTop="true">
+				<TextView android:layout_width="wrap_content"
+					android:layout_height="wrap_content" android:gravity="center_vertical"
+					android:text="/r/" android:textSize="18dip" />
+				<Spinner android:layout_width="fill_parent"
+					android:clipChildren="true" android:layout_height="wrap_content" 
+					android:entries="@array/subreddits" android:background="@android:color/transparent" />
+			</LinearLayout>
+		</RelativeLayout>
 		<ListView android:layout_width="fill_parent"
 			android:layout_height="wrap_content" android:id="@+id/posts_list" />
 	</LinearLayout>

@@ -35,7 +35,7 @@ public class ImageCacheManager {
 
 			if (!isImageInMap(key)) {
 				downloadList.add(key);
-				LogMe.e("Cache miss on key: " + key);
+				LogMe.d("Cache miss on key: " + key);
 
 				Drawable image = downloadImage(host, imageUrl);
 				if (image != null) {
@@ -45,7 +45,7 @@ public class ImageCacheManager {
 				downloadList.remove(key);
 			}
 		} else {
-			LogMe.e("Cache hit on key: " + key);
+			LogMe.d("Cache hit on key: " + key);
 		}
 
 		Drawable returnDrawable = null;
@@ -69,7 +69,7 @@ public class ImageCacheManager {
 				}
 			} catch (OutOfMemoryError oome) {
 				System.gc();
-				LogMe.e("Cleaned garbage");
+				LogMe.w("Cleaned garbage");
 			} catch (Exception e) {
 				LogMe.e(e);
 			}

@@ -2,5 +2,6 @@
 <resources>
     <string name="app_name">Ourobo</string>
     <string name="menu_refresh">Refresh</string>
-    <string name="menu_switch_subreddit">Switch subreddit</string>
+    <string name="menu_switch_subreddit">Switch Subreddit</string>
+    <string name="menu_preferences">Preferences</string>
 </resources>
