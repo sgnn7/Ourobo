@@ -63,7 +63,7 @@ public class RedditService extends HttpServlet {
 	private boolean isSubredditRequest(String path) {
 		boolean isSubredditRequest = false;
 		log("Path: " + path);
-		if (path.equalsIgnoreCase("/reddits")) {
+		if (path != null && path.contains("/reddits")) {
 			isSubredditRequest = true;
 		}
 		return isSubredditRequest;
