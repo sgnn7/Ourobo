@@ -1,7 +1,5 @@
 package org.sgnn7.ourobo.util;
 
-import java.net.URL;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -36,12 +34,12 @@ public class HttpUtils {
 		return pageContent;
 	}
 
-	public static UrlFileType getFileType(URL url) {
+	public static UrlFileType getFileType(String url) {
 		UrlFileType targetType = UrlFileType.UNKNOWN;
 		for (UrlFileType type : UrlFileType.values()) {
-			String extension = getExtension(url.getFile());
+			String extension = getExtension(url);
 			if (type.getExtensions().contains(extension)) {
-				LogMe.d("Image found: " + url.getFile());
+				LogMe.d("Image found: " + url);
 				targetType = type;
 				break;
 			}

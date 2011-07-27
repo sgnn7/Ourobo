@@ -1,12 +1,11 @@
 package org.sgnn7.ourobo.data;
 
-import java.net.URL;
 
 public class RedditPost {
 	private int score;
 	private String title;
 	private String name;
-	private URL url;
+	private String url;
 	private String permalink;
 	private int num_comments;
 	private String thumbnail;
@@ -27,11 +26,11 @@ public class RedditPost {
 		this.title = title;
 	}
 
-	public URL getUrl() {
+	public String getUrl() {
 		return url;
 	}
 
-	public void setUrl(URL url) {
+	public void setUrl(String url) {
 		this.url = url;
 	}
 

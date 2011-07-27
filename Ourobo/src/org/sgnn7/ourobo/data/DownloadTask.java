@@ -36,6 +36,7 @@ public abstract class DownloadTask extends AsyncTask<String, Void, List<RedditPo
 
 	private List<RedditPost> getRedditPostsFromContent(String pageContent) throws IOException, JsonParseException,
 			JsonMappingException {
+		LogMe.d(pageContent);
 		JsonNode topNode = new ObjectMapper().readValue(pageContent, JsonNode.class);
 		List<JsonNode> posts = JsonUtils.getJsonChildren(topNode, "data/children");
 		LogMe.d("Json Size: " + posts.size());

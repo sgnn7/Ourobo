@@ -5,6 +5,7 @@ import java.util.List;
 import org.sgnn7.ourobo.data.DownloadTaskFactory;
 import org.sgnn7.ourobo.data.RedditPost;
 import org.sgnn7.ourobo.data.RedditPostAdapter;
+import org.sgnn7.ourobo.data.SubredditController;
 import org.sgnn7.ourobo.eventing.IChangeEventListener;
 import org.sgnn7.ourobo.eventing.LazyLoadingListener;
 
@@ -18,6 +19,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
@@ -45,14 +47,16 @@ public class MainActivity extends Activity {
 
 	private RedditPostAdapter redditPostAdapter;
 	private LazyLoadingListener lazyLoadingListener;
-
 	private DownloadTaskFactory downloadTaskFactory;
+	private SubredditController subredditController;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
+
+		progressBar = (ProgressBar) findViewById(R.id.loading_view);
 
 		downloadTaskFactory = new DownloadTaskFactory() {
 			@Override
@@ -68,8 +72,6 @@ public class MainActivity extends Activity {
 			}
 		};
 
-		progressBar = (ProgressBar) findViewById(R.id.loading_view);
-
 		attachListAdapterToListView("");
 
 		lazyLoadingListener = new LazyLoadingListener(5);
@@ -81,6 +83,9 @@ public class MainActivity extends Activity {
 		postView.setOnScrollListener(lazyLoadingListener);
 
 		redditPostAdapter.refreshViews();
+
+		subredditController = new SubredditController(this, JSON_URL, (Spinner) findViewById(R.id.subreddit_spinner));
+		subredditController.loadSubreddits();
 	}
 
 	private void attachListAdapterToListView(String subreddit) {

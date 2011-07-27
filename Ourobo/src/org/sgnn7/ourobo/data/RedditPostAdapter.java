@@ -66,7 +66,7 @@ public class RedditPostAdapter extends BaseAdapter {
 		View redditPostHolder = null;
 		// Does not work for some reason :(
 		// if (convertView == null) {
-		LogMe.e("Creating view: " + redditPost.getTitle());
+		LogMe.i("Creating view: " + redditPost.getTitle());
 		redditPostHolder = activity.getLayoutInflater().inflate(R.layout.post_layout, parent, false);
 		// } else {
 		// redditPostHolder = convertView;
@@ -127,7 +127,7 @@ public class RedditPostAdapter extends BaseAdapter {
 		AsyncThumbnailLoader thumbnailLazyLoader = new AsyncThumbnailLoader(activity, postHolder, thumbnailHolder,
 				thumbnail, dataLocationUri);
 		if (isImageUrl) {
-			thumbnailLazyLoader.loadImage(redditPost.getUrl().toExternalForm());
+			thumbnailLazyLoader.loadImage(redditPost.getUrl());
 		} else {
 			thumbnailLazyLoader.loadImage(redditPost.getThumbnail());
 		}
@@ -180,8 +180,7 @@ public class RedditPostAdapter extends BaseAdapter {
 
 	private Intent getBrowserViewIntent(final RedditPost redditPost, final UrlFileType fileType) {
 		Intent targetIntent = new Intent(activity, BrowserViewActivity.class);
-		targetIntent.putExtra(BrowserViewActivity.LOCATION,
-				injectRedditMobileUrls(redditPost.getUrl().toExternalForm()));
+		targetIntent.putExtra(BrowserViewActivity.LOCATION, injectRedditMobileUrls(redditPost.getUrl()));
 		return targetIntent;
 	}
 
