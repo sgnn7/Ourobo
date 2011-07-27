@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 
-@WebServlet("/RedditService")
+@WebServlet("/RedditService/*")
 public class RedditService extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static String jsonPage1;
@@ -34,13 +34,17 @@ public class RedditService extends HttpServlet {
 		}
 
 		log(parameters);
-		// log("Path: " + request.getPathInfo());
 
 		response.setStatus(HttpServletResponse.SC_OK);
 
 		byte[] returnValue = null;
 		if (!isImageRequest(request.getParameterMap())) {
-			String returnJson = isFirstPage(request.getParameterMap()) ? jsonPage1 : jsonPage2;
+			String returnJson = "";
+			if (!isSubredditRequest(request.getPathInfo())) {
+				returnJson = isFirstPage(request.getParameterMap()) ? jsonPage1 : jsonPage2;
+			} else {
+				returnJson = IOUtils.toString(getClass().getResourceAsStream("/resources/json/reddits.json"));
+			}
 			String address = request.getLocalAddr() + ":" + request.getLocalPort()
 					+ this.getServletContext().getContextPath() + this.getServletContext().getContextPath();
 			log("Address: " + address);
@@ -54,6 +58,15 @@ public class RedditService extends HttpServlet {
 
 		response.getOutputStream().write(returnValue);
 		response.flushBuffer();
+	}
+
+	private boolean isSubredditRequest(String path) {
+		boolean isSubredditRequest = false;
+		log("Path: " + path);
+		if (path.equalsIgnoreCase("/reddits")) {
+			isSubredditRequest = true;
+		}
+		return isSubredditRequest;
 	}
 
 	private boolean isImageRequest(Map<String, String[]> parameterMap) {
