@@ -25,6 +25,7 @@ public abstract class DownloadTask extends AsyncTask<String, Void, List<RedditPo
 
 			dataLocationUri = params[0] + getParameters;
 			String pageContent = HttpUtils.getPageContent(dataLocationUri);
+			LogMe.d("Content: " + pageContent);
 			posts = getRedditPostsFromContent(pageContent);
 			LogMe.e("Posts: " + posts.size());
 		} catch (Exception e) {

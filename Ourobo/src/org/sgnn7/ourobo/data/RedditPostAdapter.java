@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.sgnn7.ourobo.BrowserViewActivity;
 import org.sgnn7.ourobo.R;
+import org.sgnn7.ourobo.eventing.IChangeEventListener;
 import org.sgnn7.ourobo.util.HttpUtils;
 import org.sgnn7.ourobo.util.ImageCacheManager;
 import org.sgnn7.ourobo.util.LogMe;
@@ -20,12 +21,13 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 public class RedditPostAdapter extends BaseAdapter {
 	private static final String PARAMETER_SEPARATOR = "&";
 
-	private static final int DEFAULT_POST_COUNT = 12;
+	private static final int DEFAULT_POST_COUNT = 24;
 	private static final String DEFAULT_SORTING_TYPE = "new";
 
 	private final List<RedditPost> redditPosts = new ArrayList<RedditPost>();
@@ -33,17 +35,35 @@ public class RedditPostAdapter extends BaseAdapter {
 	private final DownloadTaskFactory downloadTaskFactory;
 	private final Activity activity;
 
-	private final String dataLocationUri;
-	private final String mainUrl;
+	private final String baseUrl;
+	private final String dataLocationUrl;
+	private final String mobileBaseUrl;
 	private final String mobileUrl;
 
-	public RedditPostAdapter(Activity activity, DownloadTaskFactory downloadTaskFactory, String dataLocationUri,
-			String mainUrl, String mobileUrl) {
+	public RedditPostAdapter(Activity activity, String baseUrl, String dataLocationUri, String mobileBaseUrl,
+			String mobileUrl, IChangeEventListener finishedDownloadingListener) {
 		this.activity = activity;
-		this.downloadTaskFactory = downloadTaskFactory;
-		this.dataLocationUri = dataLocationUri;
-		this.mainUrl = mainUrl;
+		this.downloadTaskFactory = createDownloadTaskFactory(finishedDownloadingListener);
+		this.baseUrl = baseUrl;
+		this.dataLocationUrl = dataLocationUri;
+		this.mobileBaseUrl = mobileBaseUrl;
 		this.mobileUrl = mobileUrl;
+	}
+
+	private DownloadTaskFactory createDownloadTaskFactory(final IChangeEventListener finishedDownloadingListener) {
+		DownloadTaskFactory downloadTaskFactory = new DownloadTaskFactory() {
+			@Override
+			protected void onPostExecuteDownloadTask(List<RedditPost> results) {
+				if (!results.isEmpty()) {
+					addPosts(results);
+				} else {
+					Toast.makeText(activity, "Could not retrieve json data", Toast.LENGTH_LONG).show();
+				}
+				finishedDownloadingListener.handle();
+			}
+		};
+
+		return downloadTaskFactory;
 	}
 
 	public int getCount() {
@@ -87,12 +107,12 @@ public class RedditPostAdapter extends BaseAdapter {
 		LogMe.e("Clearing view");
 		redditPosts.clear();
 
-		downloadTaskFactory.newDownloadTask().execute(dataLocationUri, getParameterString());
+		downloadTaskFactory.newDownloadTask().execute(dataLocationUrl, getParameterString());
 	}
 
 	public void downloadMoreContent() {
 		LogMe.i("Lazy loading more content...");
-		downloadTaskFactory.newDownloadTask().execute(dataLocationUri, getParameterString());
+		downloadTaskFactory.newDownloadTask().execute(dataLocationUrl, getParameterString());
 	}
 
 	public String getLastPostId() {
@@ -125,7 +145,7 @@ public class RedditPostAdapter extends BaseAdapter {
 		final ImageView thumbnail = (ImageView) thumbnailHolder.findViewById(R.id.post_thumbnail);
 
 		AsyncThumbnailLoader thumbnailLazyLoader = new AsyncThumbnailLoader(activity, postHolder, thumbnailHolder,
-				thumbnail, dataLocationUri);
+				thumbnail, baseUrl);
 		if (isImageUrl) {
 			thumbnailLazyLoader.loadImage(redditPost.getUrl());
 		} else {
@@ -185,7 +205,7 @@ public class RedditPostAdapter extends BaseAdapter {
 	}
 
 	private String injectRedditMobileUrls(String url) {
-		return url.replace(mainUrl, mobileUrl);
+		return url.replace(baseUrl, mobileBaseUrl);
 	}
 
 	private int getBackgroundIdBasedOnTypeAndIndex(UrlFileType fileType, int index) {

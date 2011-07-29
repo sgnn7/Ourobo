@@ -2,6 +2,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
 	android:background="@drawable/blue_post_style">
+	<ProgressBar android:layout_height="wrap_content"
+		android:layout_width="wrap_content" android:layout_centerInParent="true"
+		android:visibility="visible" style="@android:style/Widget.ProgressBar.Large.Inverse" />
 	<LinearLayout android:orientation="vertical"
 		android:layout_width="fill_parent" android:layout_height="fill_parent">
 		<RelativeLayout android:layout_width="fill_parent"
@@ -22,8 +25,4 @@
 		<ListView android:layout_width="fill_parent"
 			android:layout_height="wrap_content" android:id="@+id/posts_list" />
 	</LinearLayout>
-	<ProgressBar android:id="@+id/loading_view"
-		android:layout_height="wrap_content" android:layout_width="wrap_content"
-		android:layout_alignParentTop="true" android:layout_alignParentRight="true"
-		android:visibility="invisible" style="@android:style/Widget.ProgressBar.Small" />
 </RelativeLayout>
