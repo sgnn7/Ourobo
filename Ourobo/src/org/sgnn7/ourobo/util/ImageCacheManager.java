@@ -96,4 +96,9 @@ public class ImageCacheManager {
 	public static void stopDownloads() {
 		// TODO finish me
 	}
+
+	public static void clear() {
+		imageCacheMap.clear();
+		downloadList.clear();
+	}
 }
