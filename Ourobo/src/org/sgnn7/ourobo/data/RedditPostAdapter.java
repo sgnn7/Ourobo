@@ -38,16 +38,14 @@ public class RedditPostAdapter extends BaseAdapter {
 	private final String baseUrl;
 	private final String dataLocationUrl;
 	private final String mobileBaseUrl;
-	private final String mobileUrl;
 
 	public RedditPostAdapter(Activity activity, String baseUrl, String dataLocationUri, String mobileBaseUrl,
-			String mobileUrl, IChangeEventListener finishedDownloadingListener) {
+			IChangeEventListener finishedDownloadingListener) {
 		this.activity = activity;
 		this.downloadTaskFactory = createDownloadTaskFactory(finishedDownloadingListener);
 		this.baseUrl = baseUrl;
 		this.dataLocationUrl = dataLocationUri;
 		this.mobileBaseUrl = mobileBaseUrl;
-		this.mobileUrl = mobileUrl;
 	}
 
 	private DownloadTaskFactory createDownloadTaskFactory(final IChangeEventListener finishedDownloadingListener) {
@@ -157,7 +155,7 @@ public class RedditPostAdapter extends BaseAdapter {
 			public void onClick(View v) {
 				stopAllDownloads();
 
-				String commentsUrl = mobileUrl + redditPost.getPermalink();
+				String commentsUrl = mobileBaseUrl + redditPost.getPermalink();
 				LogMe.e("Opening comments at: " + commentsUrl);
 
 				Intent targetIntent = new Intent(activity, BrowserViewActivity.class);
