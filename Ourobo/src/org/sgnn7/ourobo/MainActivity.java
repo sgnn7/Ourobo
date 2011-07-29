@@ -6,6 +6,7 @@ import org.sgnn7.ourobo.eventing.IChangeEventListener;
 import org.sgnn7.ourobo.eventing.ISubredditChangedListener;
 import org.sgnn7.ourobo.eventing.LazyLoadingListener;
 import org.sgnn7.ourobo.util.ImageCacheManager;
+import org.sgnn7.ourobo.util.LogMe;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -75,8 +76,13 @@ public class MainActivity extends Activity {
 				}
 			};
 
-			redditPostAdapter = new RedditPostAdapter(this, MAIN_URL, JSON_URL + newSubreddit + JSON_PATH_SUFFIX,
-					MOBILE_URL, MOBILE_URL + newSubreddit, finishedLoadingListener);
+			String sanitizedSubreddit = newSubreddit.endsWith("/") ? newSubreddit.substring(0,
+					newSubreddit.length() - 1) : newSubreddit;
+			LogMe.e("Data location: " + JSON_URL + sanitizedSubreddit + JSON_PATH_SUFFIX);
+			LogMe.e("Mobile Site location: " + MOBILE_URL + sanitizedSubreddit);
+
+			redditPostAdapter = new RedditPostAdapter(this, MAIN_URL, JSON_URL + sanitizedSubreddit + JSON_PATH_SUFFIX,
+					MOBILE_URL, finishedLoadingListener);
 
 			lazyLoadingListener.addLazyLoaderEventListener(new IChangeEventListener() {
 				public void handle() {
