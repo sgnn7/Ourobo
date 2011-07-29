@@ -14,30 +14,33 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 public class SubredditController {
+	private static final int SPINNER_DISPLAY_LAYOUT = android.R.layout.select_dialog_item;
 	private static final String REDDITS_URL = "/reddits/.json";
 	private static final String SUBREDDIT_PREFIX = "/r/";
-	private static final String DEFAULT_SUBREDDIT = "Main";
+	private static final String DEFAULT_SUBREDDIT = "home/";
 
 	private final Spinner subredditSpinnerView;
 	private final String dataSourceUrl;
 	private final Activity activity;
+	private final List<String> subredditList = new ArrayList<String>();
 
 	public SubredditController(Activity activity, String dataSourceUrl, Spinner subredditSpinnerView) {
 		this.activity = activity;
 		this.dataSourceUrl = dataSourceUrl;
 		this.subredditSpinnerView = subredditSpinnerView;
+
+		subredditList.add(DEFAULT_SUBREDDIT);
+		subredditSpinnerView.setAdapter(createNewSubredditAdapter());
 	}
 
 	public void loadSubreddits(final ISubredditChangedListener subredditChangedListener) {
-		final List<String> subredditList = new ArrayList<String>();
-		final ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_item,
-				subredditList);
 
 		DownloadTask downloadTask = new DownloadTask() {
 			@Override
 			protected void onPostExecute(List<RedditPost> results) {
 				LogMe.e("Downloaded " + results.size() + " subreddit categories");
 				// subredditSpinnerView.
+				subredditList.clear();
 				subredditList.add(DEFAULT_SUBREDDIT);
 				for (RedditPost redditPost : results) {
 					String subredditUrl = redditPost.getUrl().toString();
@@ -65,13 +68,18 @@ public class SubredditController {
 					}
 				});
 
-				subredditSpinnerView.setAdapter(adapter);
+				subredditSpinnerView.setAdapter(createNewSubredditAdapter());
 				subredditSpinnerView.setSelection(0);
 			}
+
 		};
 
 		String subreditUrl = dataSourceUrl + REDDITS_URL;
 		LogMe.e("Subreddits from: " + subreditUrl);
 		downloadTask.execute(subreditUrl);
+	}
+
+	private ArrayAdapter<String> createNewSubredditAdapter() {
+		return new ArrayAdapter<String>(activity, SPINNER_DISPLAY_LAYOUT, subredditList);
 	}
 }
