@@ -20,7 +20,10 @@
 					android:gravity="center" android:layout_height="wrap_content"
 					android:background="@android:color/transparent" />
 			</LinearLayout>
-		</RelativeLayout>
+		</RelativeLayout> 
+		<ImageView android:layout_width="fill_parent"
+			android:layout_height="2px" android:scaleType="fitXY" android:src="@drawable/divider"
+			android:background="@android:color/transparent"/> 
 		<ListView android:layout_width="fill_parent"
 			android:layout_height="wrap_content" android:id="@+id/posts_list" />
 	</LinearLayout>
