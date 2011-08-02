@@ -13,6 +13,9 @@ import org.apache.commons.io.IOUtils;
 
 @WebServlet("/RedditService/*")
 public class RedditService extends HttpServlet {
+	private static final String LOCALHOST_IP = "127.0.0.1";
+	private static final String ANDROID_LOCALHOST_IP = "10.0.2.2";
+
 	private static final long serialVersionUID = 1L;
 	private static String jsonPage1;
 	private static String jsonPage2;
@@ -45,8 +48,14 @@ public class RedditService extends HttpServlet {
 			} else {
 				returnJson = IOUtils.toString(getClass().getResourceAsStream("/resources/json/reddits.json"));
 			}
-			String address = request.getLocalAddr() + ":" + request.getLocalPort()
-					+ this.getServletContext().getContextPath() + this.getServletContext().getContextPath();
+
+			String localHostname = request.getLocalAddr();
+			if (localHostname.equals(LOCALHOST_IP)) {
+				localHostname = ANDROID_LOCALHOST_IP;
+			}
+
+			String address = localHostname + ":" + request.getLocalPort() + this.getServletContext().getContextPath()
+					+ this.getServletContext().getContextPath();
 			log("Address: " + address);
 
 			returnValue = returnJson.replaceAll("SERVER_ADDRESS", address).getBytes();

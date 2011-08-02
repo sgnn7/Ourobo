@@ -19,10 +19,9 @@ import android.widget.ListView;
 import android.widget.Spinner;
 
 public class MainActivity extends Activity {
+	protected static final String HTTP_PROTOCOL_PREFIX = "http://";
 
 	private static final String REDDIT_HOST = "reddit.com";
-
-	protected static final String HTTP_PROTOCOL_PREFIX = "http://";
 
 	private static final String MAIN_SUBDOMAIN = "www.";
 	private static final String JSON_SUBDOMAIN = "json.";
