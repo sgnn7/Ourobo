@@ -19,10 +19,9 @@ import android.widget.ListView;
 import android.widget.Spinner;
 
 public class MainActivity extends Activity {
+	protected static final String HTTP_PROTOCOL_PREFIX = "http://";
 
 	private static final String REDDIT_HOST = "reddit.com";
-
-	private static final String HTTP_PROTOCOL_PREFIX = "http://";
 
 	private static final String MAIN_SUBDOMAIN = "www.";
 	private static final String JSON_SUBDOMAIN = "json.";
@@ -32,11 +31,6 @@ public class MainActivity extends Activity {
 	private static final String MAIN_URL = HTTP_PROTOCOL_PREFIX + MAIN_SUBDOMAIN + REDDIT_HOST;
 	private static final String JSON_URL = HTTP_PROTOCOL_PREFIX + JSON_SUBDOMAIN + REDDIT_HOST;
 	private static final String MOBILE_URL = HTTP_PROTOCOL_PREFIX + MOBILE_SUBDOMAIN + REDDIT_HOST;
-
-	// private static final String DEBUG_SERVER = "192.168.3.70:8080";
-	// private static final String MAIN_URL = HTTP_PROTOCOL_PREFIX + DEBUG_SERVER + "/RedditService/RedditService";
-	// private static final String JSON_URL = HTTP_PROTOCOL_PREFIX + DEBUG_SERVER + "/RedditService/RedditService";
-	// private static final String MOBILE_URL = HTTP_PROTOCOL_PREFIX + DEBUG_SERVER + "/RedditService/RedditService";
 
 	private ListView postView;
 	private SubredditController subredditController;
@@ -52,7 +46,8 @@ public class MainActivity extends Activity {
 
 		attachListAdapterToListView("");
 
-		subredditController = new SubredditController(this, JSON_URL, (Spinner) findViewById(R.id.subreddit_spinner));
+		subredditController = new SubredditController(this, getJsonUrl(),
+				(Spinner) findViewById(R.id.subreddit_spinner));
 		ISubredditChangedListener subredditChangedListener = new ISubredditChangedListener() {
 			public void subredditChanged(String newSubreddit) {
 				attachListAdapterToListView(newSubreddit);
@@ -78,11 +73,11 @@ public class MainActivity extends Activity {
 
 			String sanitizedSubreddit = newSubreddit.endsWith("/") ? newSubreddit.substring(0,
 					newSubreddit.length() - 1) : newSubreddit;
-			LogMe.e("Data location: " + JSON_URL + sanitizedSubreddit + JSON_PATH_SUFFIX);
-			LogMe.e("Mobile Site location: " + MOBILE_URL + sanitizedSubreddit);
+			LogMe.e("Data location: " + getJsonUrl() + sanitizedSubreddit + JSON_PATH_SUFFIX);
+			LogMe.e("Mobile Site location: " + getMobileUrl() + sanitizedSubreddit);
 
-			redditPostAdapter = new RedditPostAdapter(this, MAIN_URL, JSON_URL + sanitizedSubreddit + JSON_PATH_SUFFIX,
-					MOBILE_URL, finishedLoadingListener);
+			redditPostAdapter = new RedditPostAdapter(this, getMainUrl(), getJsonUrl() + sanitizedSubreddit
+					+ JSON_PATH_SUFFIX, getMobileUrl(), finishedLoadingListener);
 
 			lazyLoadingListener.addLazyLoaderEventListener(new IChangeEventListener() {
 				public void handle() {
@@ -134,5 +129,17 @@ public class MainActivity extends Activity {
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	protected String getMainUrl() {
+		return MAIN_URL;
+	}
+
+	protected String getJsonUrl() {
+		return JSON_URL;
+	}
+
+	protected String getMobileUrl() {
+		return MOBILE_URL;
 	}
 }
