@@ -104,6 +104,18 @@ public class RedditPostAdapter extends BaseAdapter {
 	}
 
 	public void addPosts(final List<RedditPost> newRedditPosts) {
+		List<String> viewedLinks = new ArrayList<String>();
+		for (RedditPost oldRedditPost : redditPosts) {
+			viewedLinks.add(oldRedditPost.getName());
+		}
+
+		for (RedditPost newRedditPost : newRedditPosts) {
+			if (!viewedLinks.contains(newRedditPost.getName())) {
+				newRedditPosts.add(newRedditPost);
+			}
+		}
+		viewedLinks.clear();
+
 		redditPosts.addAll(newRedditPosts);
 		LogMe.e("Posts set. Add Size: " + newRedditPosts.size() + ". Total: " + redditPosts.size());
 		notifyDataSetChanged();
