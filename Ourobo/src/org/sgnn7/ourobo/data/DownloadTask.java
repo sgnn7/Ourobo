@@ -8,6 +8,7 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.sgnn7.ourobo.authentication.SessionManager;
 import org.sgnn7.ourobo.util.HttpUtils;
 import org.sgnn7.ourobo.util.JsonUtils;
 import org.sgnn7.ourobo.util.LogMe;
@@ -15,7 +16,11 @@ import org.sgnn7.ourobo.util.LogMe;
 import android.os.AsyncTask;
 
 public abstract class DownloadTask extends AsyncTask<String, Void, List<RedditPost>> {
-	private String dataLocationUri;
+	private final SessionManager sessionManager;
+
+	public DownloadTask(SessionManager sessionManager) {
+		this.sessionManager = sessionManager;
+	}
 
 	@Override
 	protected List<RedditPost> doInBackground(String... params) {
@@ -23,8 +28,7 @@ public abstract class DownloadTask extends AsyncTask<String, Void, List<RedditPo
 		try {
 			String getParameters = params.length < 2 ? "" : params[1];
 
-			dataLocationUri = params[0] + getParameters;
-			String pageContent = HttpUtils.getPageContent(dataLocationUri);
+			String pageContent = HttpUtils.getPageContent(sessionManager, params[0] + getParameters);
 			LogMe.d("Content: " + pageContent);
 			posts = getRedditPostsFromContent(pageContent);
 			LogMe.e("Posts: " + posts.size());

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.sgnn7.ourobo.BrowserViewActivity;
 import org.sgnn7.ourobo.R;
+import org.sgnn7.ourobo.authentication.SessionManager;
 import org.sgnn7.ourobo.eventing.IChangeEventListener;
 import org.sgnn7.ourobo.util.HttpUtils;
 import org.sgnn7.ourobo.util.ImageCacheManager;
@@ -32,6 +33,7 @@ public class RedditPostAdapter extends BaseAdapter {
 
 	private final List<RedditPost> redditPosts = new ArrayList<RedditPost>();
 
+	private final SessionManager sessionManager;
 	private final DownloadTaskFactory downloadTaskFactory;
 	private final Activity activity;
 
@@ -39,13 +41,14 @@ public class RedditPostAdapter extends BaseAdapter {
 	private final String dataLocationUrl;
 	private final String mobileBaseUrl;
 
-	public RedditPostAdapter(Activity activity, String baseUrl, String dataLocationUri, String mobileBaseUrl,
-			IChangeEventListener finishedDownloadingListener) {
+	public RedditPostAdapter(Activity activity, SessionManager sessionManager, String baseUrl, String dataLocationUri,
+			String mobileBaseUrl, IChangeEventListener finishedDownloadingListener) {
 		this.activity = activity;
 		this.downloadTaskFactory = createDownloadTaskFactory(finishedDownloadingListener);
 		this.baseUrl = baseUrl;
 		this.dataLocationUrl = dataLocationUri;
 		this.mobileBaseUrl = mobileBaseUrl;
+		this.sessionManager = sessionManager;
 	}
 
 	private DownloadTaskFactory createDownloadTaskFactory(final IChangeEventListener finishedDownloadingListener) {
@@ -58,6 +61,11 @@ public class RedditPostAdapter extends BaseAdapter {
 					Toast.makeText(activity, "Could not retrieve json data", Toast.LENGTH_LONG).show();
 				}
 				finishedDownloadingListener.handle();
+			}
+
+			@Override
+			protected SessionManager getSessionManager() {
+				return sessionManager;
 			}
 		};
 

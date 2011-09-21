@@ -1,9 +1,9 @@
 package org.sgnn7.ourobo;
 
+import org.sgnn7.ourobo.authentication.SessionManager;
 import org.sgnn7.ourobo.data.RedditPostAdapter;
 import org.sgnn7.ourobo.data.SubredditController;
 import org.sgnn7.ourobo.eventing.IChangeEventListener;
-import org.sgnn7.ourobo.eventing.ISubredditChangedListener;
 import org.sgnn7.ourobo.eventing.LazyLoadingListener;
 import org.sgnn7.ourobo.util.ImageCacheManager;
 import org.sgnn7.ourobo.util.LogMe;
@@ -44,19 +44,22 @@ public class MainActivity extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
 
-		attachListAdapterToListView("");
+		// attachListAdapterToListView("");
 
-		subredditController = new SubredditController(this, getJsonUrl(),
-				(Spinner) findViewById(R.id.subreddit_spinner));
-		ISubredditChangedListener subredditChangedListener = new ISubredditChangedListener() {
-			public void subredditChanged(String newSubreddit) {
-				attachListAdapterToListView(newSubreddit);
-			}
-		};
-		subredditController.loadSubreddits(subredditChangedListener);
+		SessionManager sessionManager = new SessionManager(this, new PreferencesManager(this));
+		sessionManager.authenticateUser();
+
+		// subredditController = new SubredditController(this, getJsonUrl(),
+		// (Spinner) findViewById(R.id.subreddit_spinner));
+		// ISubredditChangedListener subredditChangedListener = new ISubredditChangedListener() {
+		// public void subredditChanged(String newSubreddit) {
+		// attachListAdapterToListView(newSubreddit);
+		// }
+		// };
+		// subredditController.loadSubreddits(subredditChangedListener);
 	}
 
-	private void attachListAdapterToListView(String newSubreddit) {
+	private void attachListAdapterToListView(SessionManager sessionManager, String newSubreddit) {
 		if (!newSubreddit.equalsIgnoreCase(currentSubreddit)) {
 			currentSubreddit = newSubreddit;
 
@@ -76,8 +79,8 @@ public class MainActivity extends Activity {
 			LogMe.e("Data location: " + getJsonUrl() + sanitizedSubreddit + JSON_PATH_SUFFIX);
 			LogMe.e("Mobile Site location: " + getMobileUrl() + sanitizedSubreddit);
 
-			redditPostAdapter = new RedditPostAdapter(this, getMainUrl(), getJsonUrl() + sanitizedSubreddit
-					+ JSON_PATH_SUFFIX, getMobileUrl(), finishedLoadingListener);
+			redditPostAdapter = new RedditPostAdapter(this, sessionManager, getMainUrl(), getJsonUrl()
+					+ sanitizedSubreddit + JSON_PATH_SUFFIX, getMobileUrl(), finishedLoadingListener);
 
 			lazyLoadingListener.addLazyLoaderEventListener(new IChangeEventListener() {
 				public void handle() {

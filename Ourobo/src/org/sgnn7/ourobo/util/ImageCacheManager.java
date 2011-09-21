@@ -62,7 +62,7 @@ public class ImageCacheManager {
 
 		if (imageUrl != null && imageUrl.length() > 0) {
 			try {
-				byte[] binaryContent = HttpUtils.getBinaryPageContent(host, imageUrl);
+				byte[] binaryContent = HttpUtils.getBinaryPageContent(null, host, imageUrl);
 				if (binaryContent != null) {
 					Bitmap bitmap = BitmapFactory.decodeByteArray(binaryContent, 0, binaryContent.length);
 					drawable = new BitmapDrawable(bitmap);

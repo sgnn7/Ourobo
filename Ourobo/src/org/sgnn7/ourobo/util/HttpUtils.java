@@ -4,19 +4,23 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.sgnn7.ourobo.authentication.SessionManager;
 import org.sgnn7.ourobo.data.UrlFileType;
 
 public class HttpUtils {
-	public static String getPageContent(String uri) {
-		return new String(getBinaryPageContent(uri));
+	public static String getPageContent(SessionManager sessionManager, String uri) {
+		return new String(getBinaryPageContent(sessionManager, uri));
 	}
 
-	public static byte[] getBinaryPageContent(String uri) {
+	public static byte[] getBinaryPageContent(SessionManager sessionManager, String uri) {
 		long startTime = System.currentTimeMillis();
 
 		byte[] pageContent = null;
 		try {
 			HttpGet page = new HttpGet(uri);
+
+			DefaultHttpClient httpClient = new DefaultHttpClient();
+			httpClient.getCookieStore().addCookie(sessionManager.getAuthenticationCookie());
 			HttpResponse response = new DefaultHttpClient().execute(page);
 			pageContent = IOUtils.toByteArray(response.getEntity().getContent());
 			LogMe.d("Size: " + pageContent.length);
@@ -59,12 +63,12 @@ public class HttpUtils {
 		return extension.toLowerCase();
 	}
 
-	public static byte[] getBinaryPageContent(String host, String urlOrPath) {
+	public static byte[] getBinaryPageContent(SessionManager sessionManager, String host, String urlOrPath) {
 		byte[] content = null;
 		if (urlOrPath.startsWith("/")) {
-			content = getBinaryPageContent(host + urlOrPath);
+			content = getBinaryPageContent(sessionManager, host + urlOrPath);
 		} else {
-			content = getBinaryPageContent(urlOrPath);
+			content = getBinaryPageContent(sessionManager, urlOrPath);
 		}
 
 		return content;

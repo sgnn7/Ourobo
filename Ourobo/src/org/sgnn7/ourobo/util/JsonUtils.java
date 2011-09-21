@@ -26,13 +26,8 @@ public class JsonUtils {
 
 		List<RedditPost> redditPosts = new ArrayList<RedditPost>();
 		for (JsonNode post : posts) {
-			try {
-				RedditPost redditPost = objectMapper.readValue(post.get("data"), RedditPost.class);
-				redditPosts.add(redditPost);
-			} catch (Exception e) {
-				LogMe.e("Could not deserialize data " + e.getMessage());
-				e.printStackTrace();
-			}
+			RedditPost redditPost = convertJsonToBean(post.get("data"), RedditPost.class);
+			redditPosts.add(redditPost);
 		}
 
 		LogMe.logTime(startTime, "deserialize the data");
@@ -40,20 +35,42 @@ public class JsonUtils {
 		return redditPosts;
 	}
 
+	public static <T> T convertJsonToBean(JsonNode topNode, String path, Class<T> clazz) {
+		return convertJsonToBean(traverseJsonTree(topNode, path), clazz);
+	}
+
+	public static <T> T convertJsonToBean(JsonNode json, Class<T> clazz) {
+		T returnObject = null;
+		try {
+			Object obj = objectMapper.readValue(json, clazz);
+			returnObject = clazz.cast(obj);
+		} catch (Exception e) {
+			LogMe.e("Could not deserialize data " + e.getMessage());
+			e.printStackTrace();
+		}
+
+		return returnObject;
+	}
+
 	public static List<JsonNode> getJsonChildren(JsonNode topNode, String fullPath) {
 		List<JsonNode> children = new ArrayList<JsonNode>();
-		String[] paths = fullPath.split("/");
-
-		JsonNode targetNode = topNode;
-		for (String pathPart : paths) {
-			targetNode = targetNode.get(pathPart);
-		}
+		JsonNode targetNode = traverseJsonTree(topNode, fullPath);
 
 		Iterator<JsonNode> elements = targetNode.getElements();
 		while (elements.hasNext()) {
 			children.add(elements.next());
 		}
 		return children;
+	}
+
+	private static JsonNode traverseJsonTree(JsonNode topNode, String path) {
+		String[] paths = path.split("/");
+
+		JsonNode targetNode = topNode;
+		for (String pathPart : paths) {
+			targetNode = targetNode.get(pathPart);
+		}
+		return targetNode;
 	}
 
 	private static class IgnoreUnusedFieldsHandler extends DeserializationProblemHandler {
@@ -65,5 +82,4 @@ public class JsonUtils {
 			return true;
 		}
 	}
-
 }

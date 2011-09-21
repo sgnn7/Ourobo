@@ -4,4 +4,15 @@
     <string name="menu_refresh">Refresh</string>
     <string name="menu_switch_subreddit">Switch Subreddit</string>
     <string name="menu_preferences">Preferences</string>
+    
+    <string name="preference_id_username">preference_id_username</string>
+    <string name="preference_id_password">preference_id_password</string>
+    
+    
+    <!-- Localization -->
+    <string name="authentication_start">Authenticating..mmm bacon...</string>
+    <string name="authentication_failure">Scumbag site does not let you in</string>
+    <string name="authentication_success">In like Flynn</string>
+    <string name="bad_username">Username saved = epic fail</string>
+    <string name="bad_password">Password saved = epic fail</string>
 </resources>

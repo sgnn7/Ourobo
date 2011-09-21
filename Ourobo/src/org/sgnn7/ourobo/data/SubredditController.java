@@ -3,6 +3,7 @@ package org.sgnn7.ourobo.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.sgnn7.ourobo.authentication.SessionManager;
 import org.sgnn7.ourobo.eventing.ISubredditChangedListener;
 import org.sgnn7.ourobo.util.LogMe;
 
@@ -15,17 +16,22 @@ import android.widget.Spinner;
 
 public class SubredditController {
 	private static final int SPINNER_DISPLAY_LAYOUT = android.R.layout.select_dialog_item;
+
 	private static final String REDDITS_URL = "/reddits/.json";
 	private static final String SUBREDDIT_PREFIX = "/r/";
 	private static final String DEFAULT_SUBREDDIT = "home/";
+
+	private final SessionManager sessionManager;
 
 	private final Spinner subredditSpinnerView;
 	private final String dataSourceUrl;
 	private final Activity activity;
 	private final List<String> subredditList = new ArrayList<String>();
 
-	public SubredditController(Activity activity, String dataSourceUrl, Spinner subredditSpinnerView) {
+	public SubredditController(Activity activity, SessionManager sessionManager, String dataSourceUrl,
+			Spinner subredditSpinnerView) {
 		this.activity = activity;
+		this.sessionManager = sessionManager;
 		this.dataSourceUrl = dataSourceUrl;
 		this.subredditSpinnerView = subredditSpinnerView;
 
@@ -34,8 +40,7 @@ public class SubredditController {
 	}
 
 	public void loadSubreddits(final ISubredditChangedListener subredditChangedListener) {
-
-		DownloadTask downloadTask = new DownloadTask() {
+		DownloadTask downloadTask = new DownloadTask(sessionManager) {
 			@Override
 			protected void onPostExecute(List<RedditPost> results) {
 				LogMe.e("Downloaded " + results.size() + " subreddit categories");
