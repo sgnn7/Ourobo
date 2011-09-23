@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 
 public class SubredditController {
@@ -28,12 +29,15 @@ public class SubredditController {
 	private final Activity activity;
 	private final List<String> subredditList = new ArrayList<String>();
 
+	private final ProgressBar progressBar;
+
 	public SubredditController(Activity activity, SessionManager sessionManager, String dataSourceUrl,
-			Spinner subredditSpinnerView) {
+			Spinner subredditSpinnerView, ProgressBar progressBar) {
 		this.activity = activity;
 		this.sessionManager = sessionManager;
 		this.dataSourceUrl = dataSourceUrl;
 		this.subredditSpinnerView = subredditSpinnerView;
+		this.progressBar = progressBar;
 
 		subredditList.add(DEFAULT_SUBREDDIT);
 		subredditSpinnerView.setAdapter(createNewSubredditAdapter());
@@ -54,6 +58,8 @@ public class SubredditController {
 					}
 					subredditList.add(subredditUrl);
 				}
+
+				progressBar.setVisibility(View.INVISIBLE);
 
 				subredditSpinnerView.setOnItemSelectedListener(new OnItemSelectedListener() {
 					public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

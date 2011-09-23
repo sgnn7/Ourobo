@@ -2,9 +2,12 @@ package org.sgnn7.ourobo.data;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.sgnn7.ourobo.BrowserViewActivity;
 import org.sgnn7.ourobo.R;
 import org.sgnn7.ourobo.authentication.SessionManager;
@@ -104,19 +107,20 @@ public class RedditPostAdapter extends BaseAdapter {
 	}
 
 	public void addPosts(final List<RedditPost> newRedditPosts) {
-		List<String> viewedLinks = new ArrayList<String>();
+		Set<String> viewedLinks = new HashSet<String>();
 		for (RedditPost oldRedditPost : redditPosts) {
 			viewedLinks.add(oldRedditPost.getName());
 		}
 
 		for (RedditPost newRedditPost : newRedditPosts) {
 			if (!viewedLinks.contains(newRedditPost.getName())) {
-				newRedditPosts.add(newRedditPost);
+				redditPosts.add(newRedditPost);
+			} else {
+				LogMe.e("Removing duplicate post: " + newRedditPost.getName());
 			}
 		}
 		viewedLinks.clear();
 
-		redditPosts.addAll(newRedditPosts);
 		LogMe.e("Posts set. Add Size: " + newRedditPosts.size() + ". Total: " + redditPosts.size());
 		notifyDataSetChanged();
 	}
@@ -145,6 +149,14 @@ public class RedditPostAdapter extends BaseAdapter {
 		TextView titleView = (TextView) postHolder.findViewById(R.id.post_title);
 		String title = sanitizeString(redditPost.getTitle().trim());
 		titleView.setText(title);
+
+		View votingButtonsView = postHolder.findViewById(R.id.voting_buttons);
+
+		votingButtonsView.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				Toast.makeText(activity, "Voting not implemented (yet)", Toast.LENGTH_SHORT).show();
+			}
+		});
 
 		final UrlFileType fileType = HttpUtils.getFileType(redditPost.getUrl());
 
@@ -191,7 +203,7 @@ public class RedditPostAdapter extends BaseAdapter {
 	private String sanitizeString(String text) {
 		String sanitizedText = "NULL";
 		if (text != null && text.length() != 0) {
-			sanitizedText = text;
+			sanitizedText = StringEscapeUtils.unescapeHtml4(text);
 		}
 		return sanitizedText;
 	}

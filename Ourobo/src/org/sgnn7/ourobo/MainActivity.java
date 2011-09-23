@@ -4,6 +4,7 @@ import org.sgnn7.ourobo.authentication.SessionManager;
 import org.sgnn7.ourobo.data.RedditPostAdapter;
 import org.sgnn7.ourobo.data.SubredditController;
 import org.sgnn7.ourobo.eventing.IChangeEventListener;
+import org.sgnn7.ourobo.eventing.ISubredditChangedListener;
 import org.sgnn7.ourobo.eventing.LazyLoadingListener;
 import org.sgnn7.ourobo.util.ImageCacheManager;
 import org.sgnn7.ourobo.util.LogMe;
@@ -16,6 +17,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 
 public class MainActivity extends Activity {
@@ -24,7 +26,7 @@ public class MainActivity extends Activity {
 	private static final String REDDIT_HOST = "reddit.com";
 
 	private static final String MAIN_SUBDOMAIN = "www.";
-	private static final String JSON_SUBDOMAIN = "json.";
+	private static final String JSON_SUBDOMAIN = "www.";
 	private static final String MOBILE_SUBDOMAIN = "i.";
 	private static final String JSON_PATH_SUFFIX = "/.json";
 
@@ -44,19 +46,21 @@ public class MainActivity extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
 
-		// attachListAdapterToListView("");
+		// TODO: make non-blocking
+		final SessionManager sessionManager = new SessionManager(this, new PreferencesManager(this));
+		// sessionManager.authenticateUser();
 
-		SessionManager sessionManager = new SessionManager(this, new PreferencesManager(this));
-		sessionManager.authenticateUser();
+		attachListAdapterToListView(sessionManager, "");
 
-		// subredditController = new SubredditController(this, getJsonUrl(),
-		// (Spinner) findViewById(R.id.subreddit_spinner));
-		// ISubredditChangedListener subredditChangedListener = new ISubredditChangedListener() {
-		// public void subredditChanged(String newSubreddit) {
-		// attachListAdapterToListView(newSubreddit);
-		// }
-		// };
-		// subredditController.loadSubreddits(subredditChangedListener);
+		subredditController = new SubredditController(this, sessionManager, getJsonUrl(),
+				(Spinner) findViewById(R.id.subreddit_spinner), (ProgressBar) findViewById(R.id.subreddit_progressbar));
+
+		ISubredditChangedListener subredditChangedListener = new ISubredditChangedListener() {
+			public void subredditChanged(String newSubreddit) {
+				attachListAdapterToListView(sessionManager, newSubreddit);
+			}
+		};
+		subredditController.loadSubreddits(subredditChangedListener);
 	}
 
 	private void attachListAdapterToListView(SessionManager sessionManager, String newSubreddit) {

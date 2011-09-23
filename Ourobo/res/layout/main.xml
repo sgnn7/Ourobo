@@ -15,15 +15,23 @@
 				android:layout_marginLeft="10dip" android:layout_marginTop="10dip"
 				android:layout_marginRight="10dip" android:layout_marginBottom="5dip"
 				android:layout_alignParentTop="true">
-				<Spinner android:id="@+id/subreddit_spinner"
-					android:layout_width="fill_parent" android:clipChildren="true"
-					android:gravity="center" android:layout_height="wrap_content"
-					android:background="@android:color/transparent" />
+				<RelativeLayout android:layout_width="fill_parent"
+					android:layout_height="wrap_content">
+					<Spinner android:id="@+id/subreddit_spinner"
+						android:layout_width="fill_parent" android:clipChildren="true"
+						android:gravity="center" android:layout_height="wrap_content"
+						android:background="@android:color/transparent" />
+					<ProgressBar android:id="@+id/subreddit_progressbar" android:layout_height="wrap_content"
+						android:layout_width="wrap_content" android:visibility="visible" android:paddingRight="10dip"
+						android:layout_centerVertical="true"
+						android:layout_alignParentRight="true" style="@android:style/Widget.ProgressBar.Small.Inverse"/>
+				</RelativeLayout>
 			</LinearLayout>
-		</RelativeLayout> 
+
+		</RelativeLayout>
 		<ImageView android:layout_width="fill_parent"
 			android:layout_height="2px" android:scaleType="fitXY" android:src="@drawable/divider"
-			android:background="@android:color/transparent"/> 
+			android:background="@android:color/transparent" />
 		<ListView android:layout_width="fill_parent"
 			android:layout_height="wrap_content" android:id="@+id/posts_list" />
 	</LinearLayout>

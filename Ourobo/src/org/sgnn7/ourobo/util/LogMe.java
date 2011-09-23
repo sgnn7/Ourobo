@@ -7,8 +7,8 @@ public class LogMe {
 		ERROR, WARN, INFO, DEBUG
 	}
 
-	private static final String PREFIX = "Ourobo";
 	private static final LogLevels LOG_LEVEL = LogLevels.ERROR;
+	private static final String PREFIX = "Ourobo";
 
 	public static void e(String value) {
 		Log.e(PREFIX, value);

@@ -14,11 +14,15 @@ import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.HTTP;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.sgnn7.ourobo.PreferencesManager;
 import org.sgnn7.ourobo.R;
 import org.sgnn7.ourobo.data.AuthenticationResponse;
+import org.sgnn7.ourobo.util.HttpUtils;
 import org.sgnn7.ourobo.util.JsonUtils;
 import org.sgnn7.ourobo.util.LogMe;
 
@@ -49,6 +53,11 @@ public class SessionManager {
 				cookieData = response.getCookie();
 				isLoggedIn = cookieData != null;
 				LogMe.e("Logged in (cookieData=" + cookieData + ")");
+
+				// only for debug
+				LogMe.e("Checking authentication cookie");
+				String pageContent = HttpUtils.getPageContent(this, "http://www.reddit.com/api/me.json");
+				LogMe.e("Got response: " + pageContent);
 			} else {
 				displayErrors(response.getErrorMessages());
 			}
@@ -99,7 +108,7 @@ public class SessionManager {
 
 	private String postLoginCredentials(String username, String password) {
 		HttpClient httpClient = new DefaultHttpClient();
-		HttpPost httpPost = new HttpPost("http://json.reddit.com/api/login/" + username);
+		HttpPost httpPost = new HttpPost("http://www.reddit.com/api/login/" + username);
 
 		String responseContent = null;
 		try {
@@ -107,7 +116,11 @@ public class SessionManager {
 			postParameters.add(new BasicNameValuePair("api_type", "json"));
 			postParameters.add(new BasicNameValuePair("user", username));
 			postParameters.add(new BasicNameValuePair("passwd", password));
-			httpPost.setEntity(new UrlEncodedFormEntity(postParameters));
+			httpPost.setEntity(new UrlEncodedFormEntity(postParameters, HTTP.UTF_8));
+
+			HttpParams params = httpPost.getParams();
+			HttpConnectionParams.setConnectionTimeout(params, 30000);
+			HttpConnectionParams.setSoTimeout(params, 30000);
 
 			HttpResponse response = httpClient.execute(httpPost);
 			responseContent = IOUtils.toString(response.getEntity().getContent());
@@ -152,9 +165,11 @@ public class SessionManager {
 			authCookie = new BasicClientCookie("reddit_session", cookieData);
 			authCookie.setDomain(".reddit.com");
 			authCookie.setPath("/");
+			LogMe.e("Using auth cookie: " + authCookie.toString());
+		} else {
+			LogMe.e("Not using auth cookie");
 		}
 
-		LogMe.e("Cookie retrieval: " + authCookie.toString());
 		return authCookie;
 	}
 }

@@ -2,7 +2,9 @@ package org.sgnn7.ourobo.util;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.sgnn7.ourobo.authentication.SessionManager;
 import org.sgnn7.ourobo.data.UrlFileType;
@@ -20,8 +22,9 @@ public class HttpUtils {
 			HttpGet page = new HttpGet(uri);
 
 			DefaultHttpClient httpClient = new DefaultHttpClient();
-			httpClient.getCookieStore().addCookie(sessionManager.getAuthenticationCookie());
-			HttpResponse response = new DefaultHttpClient().execute(page);
+			setAuthCookie(sessionManager, httpClient);
+
+			HttpResponse response = httpClient.execute(page);
 			pageContent = IOUtils.toByteArray(response.getEntity().getContent());
 			LogMe.d("Size: " + pageContent.length);
 			LogMe.d(new String(pageContent));
@@ -36,6 +39,16 @@ public class HttpUtils {
 		LogMe.logTime(startTime, "retrieve the data from " + uri);
 
 		return pageContent;
+	}
+
+	private static void setAuthCookie(SessionManager sessionManager, DefaultHttpClient httpClient) {
+		if (sessionManager != null) {
+			Cookie authenticationCookie = sessionManager.getAuthenticationCookie();
+			if (authenticationCookie != null) {
+				CookieStore cookieStore = httpClient.getCookieStore();
+				cookieStore.addCookie(authenticationCookie);
+			}
+		}
 	}
 
 	public static UrlFileType getFileType(String url) {
