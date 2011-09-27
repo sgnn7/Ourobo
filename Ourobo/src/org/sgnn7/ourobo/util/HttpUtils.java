@@ -1,11 +1,22 @@
 package org.sgnn7.ourobo.util;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.HTTP;
 import org.sgnn7.ourobo.authentication.SessionManager;
 import org.sgnn7.ourobo.data.UrlFileType;
 
@@ -85,5 +96,37 @@ public class HttpUtils {
 		}
 
 		return content;
+	}
+
+	public static String doPost(SessionManager sessionManager, String baseUrl, String path,
+			Map<String, String> parameterMap) {
+		DefaultHttpClient httpClient = new DefaultHttpClient();
+		setAuthCookie(sessionManager, httpClient);
+
+		HttpPost httpPost = new HttpPost(baseUrl + "/" + path);
+
+		String responseContent = null;
+		try {
+			LogMe.e("Doing POST to " + baseUrl);
+
+			List<NameValuePair> postParameters = new ArrayList<NameValuePair>();
+			for (String key : parameterMap.keySet()) {
+				postParameters.add(new BasicNameValuePair(key, parameterMap.get(key)));
+			}
+			httpPost.setEntity(new UrlEncodedFormEntity(postParameters, HTTP.UTF_8));
+
+			HttpParams params = httpPost.getParams();
+			HttpConnectionParams.setConnectionTimeout(params, 30000);
+			HttpConnectionParams.setSoTimeout(params, 30000);
+
+			HttpResponse response = httpClient.execute(httpPost);
+			responseContent = IOUtils.toString(response.getEntity().getContent());
+			LogMe.e("Response: " + responseContent);
+		} catch (Exception e) {
+			LogMe.e("Error posting values: " + e.getMessage());
+			LogMe.e(e);
+		}
+
+		return responseContent;
 	}
 }

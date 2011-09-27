@@ -212,7 +212,7 @@ public class RedditPostAdapter extends BaseAdapter {
 			public void onClick(View v) {
 				boolean isAuthenticated = sessionManager.authenticateUser();
 				if (isAuthenticated) {
-					voteOnStory(redditPost.getName(), true);
+					voteOnStory(redditPost, true);
 				}
 			}
 		});
@@ -221,29 +221,26 @@ public class RedditPostAdapter extends BaseAdapter {
 			public void onClick(View v) {
 				boolean isAuthenticated = sessionManager.authenticateUser();
 				if (isAuthenticated) {
-					voteOnStory(redditPost.getName(), false);
+					voteOnStory(redditPost, false);
 				}
 			}
 		});
 
-		boolean hasVoted = redditPost.getLikes() != null;
-		if (hasVoted) {
-			boolean upvoted = redditPost.getLikes();
+		if (redditPost.getLikes() != null) {
 			ImageView upvote_icon = (ImageView) postHolder.findViewById(R.id.upvote_icon);
 			ImageView downvote_icon = (ImageView) postHolder.findViewById(R.id.downvote_icon);
-			if (upvoted) {
-				upvote_icon.setImageDrawable(upvotedImage);
-				// downvote_icon.setVisibility(View.INVISIBLE);
 
+			if (redditPost.getLikes()) {
+				upvote_icon.setImageDrawable(upvotedImage);
 			} else {
 				downvote_icon.setImageDrawable(downvotedImage);
-				// upvote_icon.setVisibility(View.INVISIBLE);
 			}
 		}
 	}
 
-	private void voteOnStory(String name, boolean isUpvote) {
-		Toast.makeText(activity, "Voting (" + isUpvote + ")...", Toast.LENGTH_SHORT).show();
+	private void voteOnStory(RedditPost redditPost, boolean isUpvote) {
+		LogMe.e("Voting (" + isUpvote + ")...");
+		new VotingTask(activity, sessionManager, baseUrl, redditPost, isUpvote).execute("someURL");
 	}
 
 	private String sanitizeString(String text) {

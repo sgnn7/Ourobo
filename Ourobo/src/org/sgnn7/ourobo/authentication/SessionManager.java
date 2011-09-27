@@ -1,22 +1,12 @@
 package org.sgnn7.ourobo.authentication;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.protocol.HTTP;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.sgnn7.ourobo.PreferencesManager;
@@ -32,11 +22,13 @@ import android.widget.Toast;
 public class SessionManager {
 	private final PreferencesManager preferencesManager;
 	private final Context context;
+	private final String baseUrl;
 
 	private String cookieData = null;
 
-	public SessionManager(Context context, PreferencesManager preferencesManager) {
+	public SessionManager(Context context, String baseUrl, PreferencesManager preferencesManager) {
 		this.context = context;
+		this.baseUrl = baseUrl;
 		this.preferencesManager = preferencesManager;
 	}
 
@@ -111,29 +103,12 @@ public class SessionManager {
 	}
 
 	private String postLoginCredentials(String username, String password) {
-		HttpClient httpClient = new DefaultHttpClient();
-		HttpPost httpPost = new HttpPost("http://www.reddit.com/api/login/" + username);
+		Map<String, String> parameterMap = new HashMap<String, String>();
+		parameterMap.put("api_type", "json");
+		parameterMap.put("user", username);
+		parameterMap.put("passwd", password);
 
-		String responseContent = null;
-		try {
-			List<NameValuePair> postParameters = new ArrayList<NameValuePair>();
-			postParameters.add(new BasicNameValuePair("api_type", "json"));
-			postParameters.add(new BasicNameValuePair("user", username));
-			postParameters.add(new BasicNameValuePair("passwd", password));
-			httpPost.setEntity(new UrlEncodedFormEntity(postParameters, HTTP.UTF_8));
-
-			HttpParams params = httpPost.getParams();
-			HttpConnectionParams.setConnectionTimeout(params, 30000);
-			HttpConnectionParams.setSoTimeout(params, 30000);
-
-			HttpResponse response = httpClient.execute(httpPost);
-			responseContent = IOUtils.toString(response.getEntity().getContent());
-			LogMe.e("Response: " + responseContent);
-		} catch (Exception e) {
-			LogMe.e("Error posting auth credentials: " + e.getMessage());
-			LogMe.e(e);
-		}
-		return responseContent;
+		return HttpUtils.doPost(null, baseUrl, "api/login/", parameterMap);
 	}
 
 	private boolean isValidPassword(String password) {
