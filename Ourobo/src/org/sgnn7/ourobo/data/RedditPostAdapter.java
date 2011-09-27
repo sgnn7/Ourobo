@@ -201,12 +201,28 @@ public class RedditPostAdapter extends BaseAdapter {
 		scoreView.setText("" + redditPost.getScore());
 	}
 
-	private void configureVotingButtons(View postHolder, RedditPost redditPost) {
-		View votingButtonsView = postHolder.findViewById(R.id.voting_buttons);
+	private void configureVotingButtons(View postHolder, final RedditPost redditPost) {
+		// disables default handler
+		postHolder.findViewById(R.id.voting_buttons).setOnClickListener(null);
 
-		votingButtonsView.setOnClickListener(new OnClickListener() {
+		View upvoteButton = postHolder.findViewById(R.id.upvote);
+		View downvoteButton = postHolder.findViewById(R.id.downvote);
+
+		upvoteButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				Toast.makeText(activity, "Voting not implemented (yet)", Toast.LENGTH_SHORT).show();
+				boolean isAuthenticated = sessionManager.authenticateUser();
+				if (isAuthenticated) {
+					voteOnStory(redditPost.getName(), true);
+				}
+			}
+		});
+
+		downvoteButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				boolean isAuthenticated = sessionManager.authenticateUser();
+				if (isAuthenticated) {
+					voteOnStory(redditPost.getName(), false);
+				}
 			}
 		});
 
@@ -217,13 +233,17 @@ public class RedditPostAdapter extends BaseAdapter {
 			ImageView downvote_icon = (ImageView) postHolder.findViewById(R.id.downvote_icon);
 			if (upvoted) {
 				upvote_icon.setImageDrawable(upvotedImage);
-				downvote_icon.setVisibility(View.INVISIBLE);
+				// downvote_icon.setVisibility(View.INVISIBLE);
 
 			} else {
 				downvote_icon.setImageDrawable(downvotedImage);
-				upvote_icon.setVisibility(View.INVISIBLE);
+				// upvote_icon.setVisibility(View.INVISIBLE);
 			}
 		}
+	}
+
+	private void voteOnStory(String name, boolean isUpvote) {
+		Toast.makeText(activity, "Voting (" + isUpvote + ")...", Toast.LENGTH_SHORT).show();
 	}
 
 	private String sanitizeString(String text) {

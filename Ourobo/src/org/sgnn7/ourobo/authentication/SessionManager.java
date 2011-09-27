@@ -43,24 +43,28 @@ public class SessionManager {
 	public boolean authenticateUser() {
 		boolean isLoggedIn = false;
 
-		String username = preferencesManager.getValue(R.string.preference_id_username, String.class);
-		String password = preferencesManager.getValue(R.string.preference_id_password, String.class);
+		if (getAuthenticationCookie() == null) {
+			String username = preferencesManager.getValue(R.string.preference_id_username, String.class);
+			String password = preferencesManager.getValue(R.string.preference_id_password, String.class);
 
-		if (isValidUsername(username) && isValidPassword(password)) {
-			AuthenticationResponse response = sendAuthenticationRequest(username, password);
-			if (response.getErrorMessages().isEmpty() && response.getCookie() != null) {
-				showMessage(R.string.authentication_success, Toast.LENGTH_SHORT);
-				cookieData = response.getCookie();
-				isLoggedIn = cookieData != null;
-				LogMe.e("Logged in (cookieData=" + cookieData + ")");
+			if (isValidUsername(username) && isValidPassword(password)) {
+				AuthenticationResponse response = sendAuthenticationRequest(username, password);
+				if (response.getErrorMessages().isEmpty() && response.getCookie() != null) {
+					showMessage(R.string.authentication_success, Toast.LENGTH_SHORT);
+					cookieData = response.getCookie();
+					isLoggedIn = cookieData != null;
+					LogMe.e("Logged in (cookieData=" + cookieData + ")");
 
-				// only for debug
-				LogMe.e("Checking authentication cookie");
-				String pageContent = HttpUtils.getPageContent(this, "http://www.reddit.com/api/me.json");
-				LogMe.e("Got response: " + pageContent);
-			} else {
-				displayErrors(response.getErrorMessages());
+					// only for debug
+					LogMe.e("Checking authentication cookie");
+					String pageContent = HttpUtils.getPageContent(this, "http://www.reddit.com/api/me.json");
+					LogMe.e("Got response: " + pageContent);
+				} else {
+					displayErrors(response.getErrorMessages());
+				}
 			}
+		} else {
+			isLoggedIn = true;
 		}
 
 		return isLoggedIn;
