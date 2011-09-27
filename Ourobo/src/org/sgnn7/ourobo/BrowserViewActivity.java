@@ -4,12 +4,14 @@ import org.sgnn7.ourobo.eventing.IChangeEventListener;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ViewSwitcher;
 
 public class BrowserViewActivity extends Activity {
 	public static final String LOCATION = "image.location";
+	private WebView webView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -20,7 +22,7 @@ public class BrowserViewActivity extends Activity {
 		setContentView(R.layout.browser_page);
 
 		final ViewSwitcher viewSwitcher = (ViewSwitcher) findViewById(R.id.main_browser_view);
-		WebView webView = new WebView(this);
+		webView = new WebView(this);
 		viewSwitcher.addView(webView);
 		// webView.setDownloadListener(new DownloadListener() {
 		// public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimeType,
@@ -59,5 +61,14 @@ public class BrowserViewActivity extends Activity {
 		webSettings.setSupportZoom(true);
 
 		webView.loadUrl(destinationUrl);
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if ((keyCode == KeyEvent.KEYCODE_BACK) && webView.canGoBack()) {
+			webView.goBack();
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
 	}
 }
