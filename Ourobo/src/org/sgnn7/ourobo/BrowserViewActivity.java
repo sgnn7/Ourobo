@@ -59,6 +59,8 @@ public class BrowserViewActivity extends Activity {
 		webSettings.setLoadsImagesAutomatically(true);
 		webSettings.setPluginsEnabled(true);
 		webSettings.setSupportZoom(true);
+		webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+		webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
 
 		webView.loadUrl(destinationUrl);
 	}
