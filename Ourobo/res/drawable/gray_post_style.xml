@@ -4,9 +4,10 @@
 
 	<gradient
         android:centerColor="@color/gray_post_center_color"
-        android:endColor="@color/gray_post_center_color"
-        android:startColor="@color/gray_post_center_color"
+        android:endColor="@color/gray_post_bottom_color"
+        android:startColor="@color/gray_post_top_color"
         android:type="linear"
+        android:angle="270"
     />
 
     <stroke 

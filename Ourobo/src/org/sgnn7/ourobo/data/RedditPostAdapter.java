@@ -18,6 +18,7 @@ import org.sgnn7.ourobo.util.LogMe;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -44,6 +45,9 @@ public class RedditPostAdapter extends BaseAdapter {
 	private final String dataLocationUrl;
 	private final String mobileBaseUrl;
 
+	private final Drawable upvotedImage;
+	private final Drawable downvotedImage;
+
 	public RedditPostAdapter(Activity activity, SessionManager sessionManager, String baseUrl, String dataLocationUri,
 			String mobileBaseUrl, IChangeEventListener finishedDownloadingListener) {
 		this.activity = activity;
@@ -52,6 +56,9 @@ public class RedditPostAdapter extends BaseAdapter {
 		this.dataLocationUrl = dataLocationUri;
 		this.mobileBaseUrl = mobileBaseUrl;
 		this.sessionManager = sessionManager;
+
+		this.upvotedImage = activity.getResources().getDrawable(R.drawable.upvoted);
+		this.downvotedImage = activity.getResources().getDrawable(R.drawable.downvoted);
 	}
 
 	private DownloadTaskFactory createDownloadTaskFactory(final IChangeEventListener finishedDownloadingListener) {
@@ -150,13 +157,7 @@ public class RedditPostAdapter extends BaseAdapter {
 		String title = sanitizeString(redditPost.getTitle().trim());
 		titleView.setText(title);
 
-		View votingButtonsView = postHolder.findViewById(R.id.voting_buttons);
-
-		votingButtonsView.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				Toast.makeText(activity, "Voting not implemented (yet)", Toast.LENGTH_SHORT).show();
-			}
-		});
+		configureVotingButtons(postHolder, redditPost);
 
 		final UrlFileType fileType = HttpUtils.getFileType(redditPost.getUrl());
 
@@ -198,6 +199,48 @@ public class RedditPostAdapter extends BaseAdapter {
 
 		TextView scoreView = (TextView) scoreHolder.findViewById(R.id.post_score);
 		scoreView.setText("" + redditPost.getScore());
+	}
+
+	private void configureVotingButtons(View postHolder, final RedditPost redditPost) {
+		// disables default handler
+		postHolder.findViewById(R.id.voting_buttons).setOnClickListener(null);
+
+		View upvoteButton = postHolder.findViewById(R.id.upvote);
+		View downvoteButton = postHolder.findViewById(R.id.downvote);
+
+		upvoteButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				boolean isAuthenticated = sessionManager.authenticateUser();
+				if (isAuthenticated) {
+					voteOnStory(redditPost, true);
+				}
+			}
+		});
+
+		downvoteButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				boolean isAuthenticated = sessionManager.authenticateUser();
+				if (isAuthenticated) {
+					voteOnStory(redditPost, false);
+				}
+			}
+		});
+
+		if (redditPost.getLikes() != null) {
+			ImageView upvote_icon = (ImageView) postHolder.findViewById(R.id.upvote_icon);
+			ImageView downvote_icon = (ImageView) postHolder.findViewById(R.id.downvote_icon);
+
+			if (redditPost.getLikes()) {
+				upvote_icon.setImageDrawable(upvotedImage);
+			} else {
+				downvote_icon.setImageDrawable(downvotedImage);
+			}
+		}
+	}
+
+	private void voteOnStory(RedditPost redditPost, boolean isUpvote) {
+		LogMe.e("Voting (" + isUpvote + ")...");
+		new VotingTask(activity, sessionManager, baseUrl, redditPost, isUpvote).execute("someURL");
 	}
 
 	private String sanitizeString(String text) {

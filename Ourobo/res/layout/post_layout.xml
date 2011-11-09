@@ -10,10 +10,10 @@
 			<RelativeLayout android:id="@+id/upvote"
 				android:layout_width="fill_parent" android:layout_height="0px"
 				android:layout_weight="1">
-				<ImageView android:layout_width="20dip"
-					android:layout_height="wrap_content" android:src="@drawable/upvote"
-					android:background="@android:color/transparent" android:scaleType="fitCenter"
-					android:layout_centerInParent="true" />
+				<ImageView android:id="@+id/upvote_icon"
+					android:layout_width="20dip" android:layout_height="wrap_content"
+					android:src="@drawable/upvote" android:background="@android:color/transparent"
+					android:scaleType="fitCenter" android:layout_centerInParent="true" />
 			</RelativeLayout>
 
 			<RelativeLayout android:layout_width="fill_parent"
@@ -26,10 +26,10 @@
 			<RelativeLayout android:id="@+id/downvote"
 				android:layout_width="fill_parent" android:layout_height="0px"
 				android:layout_weight="1">
-				<ImageView android:layout_width="20dip"
-					android:layout_height="wrap_content" android:src="@drawable/downvote"
-					android:background="@android:color/transparent" android:scaleType="fitCenter"
-					android:layout_centerInParent="true" />
+				<ImageView android:id="@+id/downvote_icon"
+					android:layout_width="20dip" android:layout_height="wrap_content"
+					android:src="@drawable/downvote" android:background="@android:color/transparent"
+					android:scaleType="fitCenter" android:layout_centerInParent="true" />
 			</RelativeLayout>
 		</LinearLayout>
 	</RelativeLayout>

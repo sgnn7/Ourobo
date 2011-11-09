@@ -46,8 +46,8 @@ public class MainActivity extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.main);
 
+		final SessionManager sessionManager = new SessionManager(this, MAIN_URL, new PreferencesManager(this));
 		// TODO: make non-blocking
-		final SessionManager sessionManager = new SessionManager(this, new PreferencesManager(this));
 		// sessionManager.authenticateUser();
 
 		attachListAdapterToListView(sessionManager, "");

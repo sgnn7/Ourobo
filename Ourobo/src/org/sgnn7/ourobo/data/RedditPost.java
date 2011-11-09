@@ -1,6 +1,5 @@
 package org.sgnn7.ourobo.data;
 
-
 public class RedditPost {
 	private int score;
 	private String title;
@@ -9,6 +8,7 @@ public class RedditPost {
 	private String permalink;
 	private int num_comments;
 	private String thumbnail;
+	private Boolean likes;
 
 	public int getScore() {
 		return score;
@@ -64,5 +64,13 @@ public class RedditPost {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Boolean getLikes() {
+		return likes;
+	}
+
+	public void setLikes(Boolean likes) {
+		this.likes = likes;
 	}
 }
