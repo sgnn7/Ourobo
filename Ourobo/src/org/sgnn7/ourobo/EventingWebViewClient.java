@@ -24,7 +24,6 @@ public class EventingWebViewClient extends WebViewClient {
 	private static final String MAIN_YOUTUBE_SITE = "youtube.com/";
 
 	private static final String YOUTUBE_LINK_PREFIX = "vnd.youtube:";
-
 	private static final String NO_MATCHING_INTENT = "Cannot find an app to handle this kind of link";
 
 	private final Activity activity;

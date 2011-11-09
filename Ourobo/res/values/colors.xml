@@ -1,6 +1,16 @@
 <resources>
-    <color name="gray_post_center_color">#e7eaec</color>
-    <color name="blue_post_center_color">#C8D7E4</color>
+   	<color name="post_score_top_color"   >#EEE</color>
+    <color name="post_score_center_color">#E5E5E5</color>
+    <color name="post_score_bottom_color">#DDD</color>
+    
+	<color name="gray_post_top_color"   >#EBF0F0</color>
+    <color name="gray_post_center_color">#E9ECEC</color>
+    <color name="gray_post_bottom_color">#E4E9E9</color>
+        
+    <color name="blue_post_top_color"   >#D0E0F0</color>
+    <color name="blue_post_center_color">#C8D7E7</color>
+    <color name="blue_post_bottom_color">#C6D5E4</color>
+    
     <color name="image_post_center_color">#C8E7D4</color>
     <color name="post_text_color">#666</color>
     <color name="score_color">#888</color>

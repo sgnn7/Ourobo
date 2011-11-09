@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent" android:layout_height="fill_parent"
-	android:background="@drawable/blue_post_style">
+	android:background="@color/blue_post_center_color">
 	<ProgressBar android:layout_height="wrap_content"
 		android:layout_width="wrap_content" android:layout_centerInParent="true"
 		android:visibility="visible" style="@android:style/Widget.ProgressBar.Large.Inverse" />

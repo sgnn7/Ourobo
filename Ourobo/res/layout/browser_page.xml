@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ViewSwitcher xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/main_browser_view" android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
-	<RelativeLayout android:layout_width="fill_parent"
-		android:layout_height="fill_parent">
-		<ProgressBar android:layout_width="wrap_content"
-			android:layout_height="wrap_content" style="@android:style/Widget.ProgressBar.Large"
-			android:layout_centerInParent="true" />
-	</RelativeLayout>
-</ViewSwitcher>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_browser_view"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@android:color/transparent" >
+
+    <ProgressBar
+        android:id="@+id/progress_meter"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="4dip"
+        android:max="100"
+        android:progress="0" />
+
+</RelativeLayout>
