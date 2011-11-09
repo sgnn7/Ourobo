@@ -5,9 +5,13 @@ import org.sgnn7.ourobo.eventing.IChangeEventListener;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.KeyEvent;
+import android.view.View;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.ViewSwitcher;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 
 public class BrowserViewActivity extends Activity {
 	public static final String LOCATION = "image.location";
@@ -21,30 +25,30 @@ public class BrowserViewActivity extends Activity {
 
 		setContentView(R.layout.browser_page);
 
-		final ViewSwitcher viewSwitcher = (ViewSwitcher) findViewById(R.id.main_browser_view);
+		final RelativeLayout browserLayout = (RelativeLayout) findViewById(R.id.main_browser_view);
+
 		webView = new WebView(this);
-		viewSwitcher.addView(webView);
-		// webView.setDownloadListener(new DownloadListener() {
-		// public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimeType,
-		// long contentLength) {
-		// Intent viewIntent = new Intent(Intent.ACTION_VIEW);
-		// viewIntent.setDataAndType(Uri.parse(url), mimeType);
-		//
-		// try {
-		// startActivity(viewIntent);
-		// } catch (ActivityNotFoundException ex) {
-		// LogMe.e("Couldn't find activity to view mimetype: " + mimeType);
-		// }
-		//
-		// }
-		// });
+
+		// Hack for faulty APIs
+		webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+
+		RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT,
+				LayoutParams.FILL_PARENT);
+		browserLayout.addView(webView, 0, layoutParams);
 
 		EventingWebViewClient client = new EventingWebViewClient(this);
 		client.addPageLoadedListener(new IChangeEventListener() {
 			public void handle() {
-				if (!(viewSwitcher.getCurrentView() instanceof WebView)) {
-					viewSwitcher.showNext();
-				}
+				View progressIndicator = BrowserViewActivity.this.findViewById(R.id.progress_meter);
+				progressIndicator.setVisibility(View.INVISIBLE);
+			}
+		});
+
+		webView.setWebChromeClient(new WebChromeClient() {
+			@Override
+			public void onProgressChanged(WebView view, int progress) {
+				ProgressBar progressMeter = (ProgressBar) BrowserViewActivity.this.findViewById(R.id.progress_meter);
+				progressMeter.setProgress(progress);
 			}
 		});
 
