@@ -45,7 +45,7 @@ public abstract class DownloadTask extends AsyncTask<String, Void, List<RedditPo
 		JsonNode topNode = new ObjectMapper().readValue(pageContent, JsonNode.class);
 		List<JsonNode> posts = JsonUtils.getJsonChildren(topNode, "data/children");
 		LogMe.d("Json Size: " + posts.size());
-		List<RedditPost> usablePosts = JsonUtils.convertJsonPostNodesToJavaBeans(posts);
+		List<RedditPost> usablePosts = JsonUtils.convertJsonPostsToObjects(posts);
 		return usablePosts;
 	}
 

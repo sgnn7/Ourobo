@@ -21,6 +21,9 @@ import org.sgnn7.ourobo.authentication.SessionManager;
 import org.sgnn7.ourobo.data.UrlFileType;
 
 public class HttpUtils {
+	private static final int DOWNLOAD_TIMEOUT = 30000;
+	private static final int CONNECTION_TIMEOUT = 5000;
+
 	public static String getPageContent(SessionManager sessionManager, String uri) {
 		return new String(getBinaryPageContent(sessionManager, uri));
 	}
@@ -116,8 +119,8 @@ public class HttpUtils {
 			httpPost.setEntity(new UrlEncodedFormEntity(postParameters, HTTP.UTF_8));
 
 			HttpParams params = httpPost.getParams();
-			HttpConnectionParams.setConnectionTimeout(params, 30000);
-			HttpConnectionParams.setSoTimeout(params, 30000);
+			HttpConnectionParams.setConnectionTimeout(params, CONNECTION_TIMEOUT);
+			HttpConnectionParams.setSoTimeout(params, DOWNLOAD_TIMEOUT);
 
 			HttpResponse response = httpClient.execute(httpPost);
 			responseContent = IOUtils.toString(response.getEntity().getContent());

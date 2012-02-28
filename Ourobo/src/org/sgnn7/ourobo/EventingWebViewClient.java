@@ -1,6 +1,5 @@
 package org.sgnn7.ourobo;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.sgnn7.ourobo.eventing.IChangeEventListener;
@@ -11,6 +10,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -27,7 +27,10 @@ public class EventingWebViewClient extends WebViewClient {
 	private static final String NO_MATCHING_INTENT = "Cannot find an app to handle this kind of link";
 
 	private final Activity activity;
-	private final List<IChangeEventListener> listeners = new ArrayList<IChangeEventListener>();
+
+	private IChangeEventListener pageLoadedListener;
+	private IChangeEventListener errorOccuredListener;
+	private IChangeEventListener pageStartedListener;
 
 	public EventingWebViewClient(Activity activity) {
 		this.activity = activity;
@@ -35,18 +38,20 @@ public class EventingWebViewClient extends WebViewClient {
 
 	@Override
 	public void onPageFinished(WebView view, String url) {
-		notifyAllListeners();
+		pageLoadedListener.handle();
 		super.onPageFinished(view, url);
 	}
 
-	private void notifyAllListeners() {
-		for (IChangeEventListener listener : listeners) {
-			listener.handle();
-		}
+	public void setPageLoadedListener(IChangeEventListener listener) {
+		pageLoadedListener = listener;
 	}
 
-	public void addPageLoadedListener(IChangeEventListener listener) {
-		listeners.add(listener);
+	public void setPageStartedListener(IChangeEventListener listener) {
+		pageStartedListener = listener;
+	}
+
+	public void setErrorOccuredListener(IChangeEventListener listener) {
+		errorOccuredListener = listener;
 	}
 
 	@Override
@@ -64,6 +69,16 @@ public class EventingWebViewClient extends WebViewClient {
 		}
 
 		return overrideUrlLoading;
+	}
+
+	@Override
+	public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+		errorOccuredListener.handle();
+	}
+
+	@Override
+	public void onPageStarted(WebView view, String url, Bitmap favicon) {
+		pageStartedListener.handle();
 	}
 
 	private String extractVideoId(String url) {

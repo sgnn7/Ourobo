@@ -21,7 +21,7 @@ public class JsonUtils {
 		objectMapper.getDeserializationConfig().addHandler(new IgnoreUnusedFieldsHandler());
 	}
 
-	public static List<RedditPost> convertJsonPostNodesToJavaBeans(List<JsonNode> posts) {
+	public static List<RedditPost> convertJsonPostsToObjects(List<JsonNode> posts) {
 		long startTime = System.currentTimeMillis();
 
 		List<RedditPost> redditPosts = new ArrayList<RedditPost>();

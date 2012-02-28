@@ -43,12 +43,12 @@ public class SubredditController {
 		subredditSpinnerView.setAdapter(createNewSubredditAdapter());
 	}
 
-	public void loadSubreddits(final ISubredditChangedListener subredditChangedListener) {
+	public void reloadSubreddits(final ISubredditChangedListener subredditChangedListener) {
 		DownloadTask downloadTask = new DownloadTask(sessionManager) {
 			@Override
 			protected void onPostExecute(List<RedditPost> results) {
 				LogMe.e("Downloaded " + results.size() + " subreddit categories");
-				// subredditSpinnerView.
+
 				subredditList.clear();
 				subredditList.add(DEFAULT_SUBREDDIT);
 				for (RedditPost redditPost : results) {

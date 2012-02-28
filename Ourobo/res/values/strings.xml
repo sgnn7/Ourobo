@@ -10,9 +10,9 @@
     
     
     <!-- Localization -->
-    <string name="authentication_start">Authenticating..mmm bacon...</string>
-    <string name="authentication_failure">Scumbag site does not let you in</string>
-    <string name="authentication_success">In like Flynn</string>
-    <string name="bad_username">Username saved = epic fail</string>
-    <string name="bad_password">Password saved = epic fail</string>
+    <string name="authentication_start">Authenticating.. mmm bacon..</string>
+    <string name="authentication_failure">Could not authenticate you. Scumbag site fail</string>
+    <string name="authentication_success">Logged in but voting is still not working correctly</string>
+    <string name="bad_username">Bad username. No bacon for you</string>
+    <string name="bad_password">Bad password. Epic fail on your part</string>
 </resources>

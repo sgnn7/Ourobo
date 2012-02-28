@@ -175,12 +175,12 @@ public class RedditPostAdapter extends BaseAdapter {
 		ViewSwitcher thumbnailHolder = (ViewSwitcher) postHolder.findViewById(R.id.post_thumbnail_holder);
 		final ImageView thumbnail = (ImageView) thumbnailHolder.findViewById(R.id.post_thumbnail);
 
-		AsyncThumbnailLoader thumbnailLazyLoader = new AsyncThumbnailLoader(activity, postHolder, thumbnailHolder,
-				thumbnail, baseUrl);
+		AsyncThumbnailLoader thumbnailLazyLoader = new AsyncThumbnailLoader(postHolder, thumbnailHolder, thumbnail,
+				baseUrl);
 		if (isImageUrl) {
-			thumbnailLazyLoader.loadImage(redditPost.getUrl());
+			thumbnailLazyLoader.loadImage(activity, redditPost.getUrl());
 		} else {
-			thumbnailLazyLoader.loadImage(redditPost.getThumbnail());
+			thumbnailLazyLoader.loadImage(activity, redditPost.getThumbnail());
 		}
 
 		RelativeLayout scoreHolder = (RelativeLayout) postHolder.findViewById(R.id.post_score_holder);
@@ -282,10 +282,7 @@ public class RedditPostAdapter extends BaseAdapter {
 	}
 
 	private int getBackgroundIdBasedOnTypeAndIndex(UrlFileType fileType, int index) {
-		int backdgoundId = R.drawable.gray_post_style;
-		if (index % 2 != 0) {
-			backdgoundId = R.drawable.blue_post_style;
-		}
-		return backdgoundId;
+		boolean isOddPostNumber = index % 2 == 0;
+		return isOddPostNumber ? R.drawable.gray_post_style : R.drawable.blue_post_style;
 	}
 }

@@ -1,52 +1,32 @@
 package org.sgnn7.ourobo.data;
 
-import org.sgnn7.ourobo.eventing.IImageLoadedListener;
 import org.sgnn7.ourobo.util.ImageCacheManager;
 import org.sgnn7.ourobo.util.LogMe;
 
 import android.app.Activity;
-import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ViewSwitcher;
 
 public class AsyncThumbnailLoader {
-	private final ImageView thumbnail;
-	private final String host;
-	private final Activity activity;
 	private final ViewSwitcher thumbnailHolder;
+	private final ImageView thumbnail;
 	private final View postHolder;
+	private final String host;
 
-	public AsyncThumbnailLoader(Activity activity, View postHolder, ViewSwitcher thumbnailHolder, ImageView thumbnail,
-			String host) {
-		this.activity = activity;
+	public AsyncThumbnailLoader(View postHolder, ViewSwitcher thumbnailHolder, ImageView thumbnail, String host) {
 		this.postHolder = postHolder;
 		this.thumbnailHolder = thumbnailHolder;
 		this.thumbnail = thumbnail;
 		this.host = host;
 	}
 
-	public void loadImage(String imageUrl) {
-		if (imageUrl != null && imageUrl.length() > 0) {
-			IImageLoadedListener imageLoadedListener = new IImageLoadedListener() {
-				public void finishedLoading(final Drawable drawable) {
-					activity.runOnUiThread(new Runnable() {
-						public void run() {
-							if (drawable != null) {
-								thumbnailHolder.setVisibility(View.VISIBLE);
-								thumbnailHolder.reset();
-								thumbnail.setImageDrawable(drawable);
-								thumbnailHolder.showNext();
-							} else {
-								thumbnailHolder.setVisibility(View.GONE);
-							}
-						}
-					});
-				}
-			};
-
+	public void loadImage(Activity activity, String imageUrl) {
+		boolean isValidImageUrl = imageUrl != null && imageUrl.length() > 0;
+		if (isValidImageUrl) {
 			LogMe.i("Loading image " + imageUrl);
-			ImageCacheManager.getImage(host, imageUrl, imageLoadedListener);
+			ImageCacheManager.getImage(host, imageUrl, new UpdateUiImageLoadedListener(activity, thumbnailHolder,
+					thumbnail));
 		} else {
 			thumbnailHolder.setVisibility(View.GONE);
 		}

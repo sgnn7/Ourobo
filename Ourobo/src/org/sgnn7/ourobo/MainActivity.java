@@ -10,6 +10,8 @@ import org.sgnn7.ourobo.util.ImageCacheManager;
 import org.sgnn7.ourobo.util.LogMe;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -40,13 +42,19 @@ public class MainActivity extends Activity {
 
 	private String currentSubreddit = null;
 
+	private ISubredditChangedListener subredditChangedListener;
+	private IChangeEventListener finishedLoadingListener;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
+
 		setContentView(R.layout.main);
 
 		final SessionManager sessionManager = new SessionManager(this, MAIN_URL, new PreferencesManager(this));
+
 		// TODO: make non-blocking
 		// sessionManager.authenticateUser();
 
@@ -55,24 +63,24 @@ public class MainActivity extends Activity {
 		subredditController = new SubredditController(this, sessionManager, getJsonUrl(),
 				(Spinner) findViewById(R.id.subreddit_spinner), (ProgressBar) findViewById(R.id.subreddit_progressbar));
 
-		ISubredditChangedListener subredditChangedListener = new ISubredditChangedListener() {
+		subredditChangedListener = new ISubredditChangedListener() {
 			public void subredditChanged(String newSubreddit) {
 				attachListAdapterToListView(sessionManager, newSubreddit);
 			}
 		};
-		subredditController.loadSubreddits(subredditChangedListener);
+		subredditController.reloadSubreddits(subredditChangedListener);
 	}
 
 	private void attachListAdapterToListView(SessionManager sessionManager, String newSubreddit) {
 		if (!newSubreddit.equalsIgnoreCase(currentSubreddit)) {
 			currentSubreddit = newSubreddit;
 
-			garbageCollection();
+			collectGarbage();
 
 			postView = (ListView) findViewById(R.id.posts_list);
 			final LazyLoadingListener lazyLoadingListener = new LazyLoadingListener(5);
 
-			IChangeEventListener finishedLoadingListener = new IChangeEventListener() {
+			finishedLoadingListener = new IChangeEventListener() {
 				public void handle() {
 					lazyLoadingListener.contentLoaded();
 				}
@@ -102,8 +110,10 @@ public class MainActivity extends Activity {
 	}
 
 	// XXX There must be a better way of doing something like this...
-	private void garbageCollection() {
+	private void collectGarbage() {
 		redditPostAdapter = null;
+		finishedLoadingListener = null;
+
 		ImageCacheManager.clear();
 
 		System.gc();
@@ -121,8 +131,12 @@ public class MainActivity extends Activity {
 		switch (item.getItemId()) {
 		case R.id.menu_refresh:
 			if (redditPostAdapter != null) {
-				redditPostAdapter.refreshViews();
 				redditPostAdapter.stopAllDownloads();
+				redditPostAdapter.refreshViews();
+			}
+
+			if (subredditController != null) {
+				subredditController.reloadSubreddits(subredditChangedListener);
 			}
 			return true;
 		case R.id.menu_switch_subreddit:
@@ -130,12 +144,27 @@ public class MainActivity extends Activity {
 			subredditSpinner.performClick();
 			return true;
 		case R.id.menu_preferences:
-			Intent preferenceActivity = new Intent(getBaseContext(), AppPreferenceActivity.class);
-			startActivity(preferenceActivity);
+			startActivity(new Intent(this, AppPreferenceActivity.class));
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	@Override
+	public void onBackPressed() {
+		AlertDialog alertDialog = new AlertDialog.Builder(this).setIcon(android.R.drawable.btn_dialog)
+				.setTitle("Exit App").setMessage("Are you sure you want to exit the app?")
+				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						MainActivity.this.moveTaskToBack(true);
+					}
+				}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+					}
+				}).create();
+
+		alertDialog.show();
 	}
 
 	protected String getMainUrl() {

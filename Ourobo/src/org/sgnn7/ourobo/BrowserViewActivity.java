@@ -3,11 +3,13 @@ package org.sgnn7.ourobo;
 import org.sgnn7.ourobo.eventing.IChangeEventListener;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
+import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -20,8 +22,6 @@ public class BrowserViewActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		String destinationUrl = getIntent().getStringExtra(LOCATION);
 
 		setContentView(R.layout.browser_page);
 
@@ -36,23 +36,41 @@ public class BrowserViewActivity extends Activity {
 				LayoutParams.FILL_PARENT);
 		browserLayout.addView(webView, 0, layoutParams);
 
+		final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_meter);
+
 		EventingWebViewClient client = new EventingWebViewClient(this);
-		client.addPageLoadedListener(new IChangeEventListener() {
+		client.setPageLoadedListener(new IChangeEventListener() {
 			public void handle() {
-				View progressIndicator = BrowserViewActivity.this.findViewById(R.id.progress_meter);
-				progressIndicator.setVisibility(View.INVISIBLE);
+				progressBar.setVisibility(View.INVISIBLE);
+			}
+		});
+
+		client.setPageStartedListener(new IChangeEventListener() {
+			public void handle() {
+				progressBar.setVisibility(View.VISIBLE);
+			}
+		});
+
+		client.setErrorOccuredListener(new IChangeEventListener() {
+			public void handle() {
+				webView.setBackgroundColor(Color.WHITE);
 			}
 		});
 
 		webView.setWebChromeClient(new WebChromeClient() {
 			@Override
 			public void onProgressChanged(WebView view, int progress) {
-				ProgressBar progressMeter = (ProgressBar) BrowserViewActivity.this.findViewById(R.id.progress_meter);
-				progressMeter.setProgress(progress);
+				progressBar.setProgress(progress);
+			}
+
+			@Override
+			public void onReachedMaxAppCacheSize(long spaceNeeded, long totalUsedQuota,
+					WebStorage.QuotaUpdater quotaUpdater) {
+				quotaUpdater.updateQuota(spaceNeeded * 2);
 			}
 		});
 
-		webView.setBackgroundColor(R.color.black);
+		webView.setBackgroundColor(Color.BLACK);
 		webView.setInitialScale(100);
 		webView.setWebViewClient(client);
 
@@ -63,18 +81,35 @@ public class BrowserViewActivity extends Activity {
 		webSettings.setLoadsImagesAutomatically(true);
 		webSettings.setPluginsEnabled(true);
 		webSettings.setSupportZoom(true);
-		webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
 		webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
 
+		webSettings.setAllowFileAccess(true);
+		webSettings.setDomStorageEnabled(true);
+		webSettings.setAppCacheMaxSize(16 * 1024 * 1024);
+		webSettings.setAppCacheEnabled(true);
+		webSettings.setAppCachePath("/data/data/org.sgnn7.ourobo/cache");
+		webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
+
+		String destinationUrl = getIntent().getStringExtra(LOCATION);
 		webView.loadUrl(destinationUrl);
 	}
 
 	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if ((keyCode == KeyEvent.KEYCODE_BACK) && webView.canGoBack()) {
+	protected void onNewIntent(Intent intent) {
+		webView.clearHistory();
+		webView.setBackgroundColor(Color.BLACK);
+
+		String destinationUrl = getIntent().getStringExtra(LOCATION);
+		webView.loadUrl(destinationUrl);
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (webView.canGoBack()) {
+
 			webView.goBack();
-			return true;
+		} else {
+			super.onBackPressed();
 		}
-		return super.onKeyDown(keyCode, event);
 	}
 }

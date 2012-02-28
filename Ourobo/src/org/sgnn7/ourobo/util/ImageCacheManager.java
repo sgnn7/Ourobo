@@ -1,11 +1,13 @@
 package org.sgnn7.ourobo.util;
 
-import java.lang.ref.WeakReference;
+import java.lang.ref.SoftReference;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.sgnn7.ourobo.eventing.IImageLoadedListener;
 
@@ -15,78 +17,83 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
 public class ImageCacheManager {
-
-	private static Map<String, WeakReference<Drawable>> imageCacheMap = new ConcurrentHashMap<String, WeakReference<Drawable>>();
+	private static Map<String, SoftReference<Drawable>> imageCache = new ConcurrentHashMap<String, SoftReference<Drawable>>();
 	private static Set<String> downloadList = Collections.synchronizedSet(new HashSet<String>());
 
+	private static ExecutorService executorService = Executors.newFixedThreadPool(10);
+
 	public static void getImage(final String host, final String imageUrl, final IImageLoadedListener callback) {
-		new Thread(new Runnable() {
-			public void run() {
-				Drawable image = getImageSync(host, imageUrl);
-				callback.finishedLoading(image);
+		boolean isValidImageUrl = imageUrl != null && imageUrl.length() > 0;
+
+		if (isValidImageUrl) {
+			if (isImageInMap(imageUrl)) {
+				LogMe.d("Cache hit on key: " + imageUrl);
+
+				callback.finishedLoading(getDrawableFromCache(imageUrl));
+			} else {
+				LogMe.d("Cache miss on key: " + imageUrl);
+
+				executorService.execute(new Runnable() {
+					public void run() {
+						callback.finishedLoading(getImageSynced(host, imageUrl));
+					}
+				});
 			}
-		}).start();
+		}
 	}
 
-	private static Drawable getImageSync(String host, String imageUrl) {
-		final String key = imageUrl;
-		if (!isImageInMap(key)) {
-			waitUntilOtherThreadDownloadsImage(key);
+	private static Drawable getImageSynced(String host, String imageUrl) {
+		waitUntilOtherThreadDownloadsImage(imageUrl);
 
-			if (!isImageInMap(key)) {
-				downloadList.add(key);
-				LogMe.d("Cache miss on key: " + key);
+		if (!isImageInMap(imageUrl)) {
+			downloadList.add(imageUrl);
 
-				Drawable image = downloadImage(host, imageUrl);
-				if (image != null) {
-					WeakReference<Drawable> weakBitmapReference = new WeakReference<Drawable>(image);
-					imageCacheMap.put(key, weakBitmapReference);
-				}
-				downloadList.remove(key);
+			Drawable image = downloadImage(host, imageUrl);
+			if (image != null) {
+				imageCache.put(imageUrl, new SoftReference<Drawable>(image));
 			}
-		} else {
-			LogMe.d("Cache hit on key: " + key);
+			downloadList.remove(imageUrl);
 		}
 
+		return getDrawableFromCache(imageUrl);
+	}
+
+	private static Drawable getDrawableFromCache(String imageUrl) {
 		Drawable returnDrawable = null;
-		WeakReference<Drawable> weakReference = imageCacheMap.get(key);
-		if (weakReference != null && weakReference.get() != null) {
-			returnDrawable = weakReference.get();
+		SoftReference<Drawable> softReference = imageCache.get(imageUrl);
+		if (softReference != null && softReference.get() != null) {
+			returnDrawable = softReference.get();
 		}
-
 		return returnDrawable;
 	}
 
 	private static Drawable downloadImage(final String host, final String imageUrl) {
 		BitmapDrawable drawable = null;
 
-		if (imageUrl != null && imageUrl.length() > 0) {
-			try {
-				byte[] binaryContent = HttpUtils.getBinaryPageContent(null, host, imageUrl);
-				if (binaryContent != null) {
-					Bitmap bitmap = BitmapFactory.decodeByteArray(binaryContent, 0, binaryContent.length);
-					drawable = new BitmapDrawable(bitmap);
-				}
-			} catch (OutOfMemoryError oome) {
-				System.gc();
-				LogMe.w("Cleaned garbage");
-			} catch (Exception e) {
-				LogMe.e(e);
+		try {
+			byte[] binaryContent = HttpUtils.getBinaryPageContent(null, host, imageUrl);
+			if (binaryContent != null) {
+				Bitmap bitmap = BitmapFactory.decodeByteArray(binaryContent, 0, binaryContent.length);
+				drawable = new BitmapDrawable(bitmap);
 			}
+		} catch (OutOfMemoryError oome) {
+			System.gc();
+			LogMe.w("Cleaned garbage");
+		} catch (Exception e) {
+			LogMe.e(e);
 		}
 
 		return drawable;
 	}
 
 	private static boolean isImageInMap(String key) {
-		return imageCacheMap.containsKey(key) && imageCacheMap.get(key) != null && imageCacheMap.get(key).get() != null;
-		// return imageCacheMap.containsKey(key) && imageCacheMap.get(key) != null;
+		return imageCache.containsKey(key) && imageCache.get(key) != null && imageCache.get(key).get() != null;
 	}
 
 	private static void waitUntilOtherThreadDownloadsImage(String key) {
 		while (downloadList.contains(key)) {
 			try {
-				Thread.sleep(250);
+				Thread.sleep(500);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -94,11 +101,11 @@ public class ImageCacheManager {
 	}
 
 	public static void stopDownloads() {
-		// TODO finish me
+		clear();
 	}
 
 	public static void clear() {
-		imageCacheMap.clear();
 		downloadList.clear();
+		imageCache.clear();
 	}
 }

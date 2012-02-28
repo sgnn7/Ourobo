@@ -1,28 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	android:versionCode="9" android:versionName="0.9" package="org.sgnn7.ourobo">
-	<uses-sdk android:minSdkVersion="7" />
-	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
+    package="org.sgnn7.ourobo"
+    android:versionCode="9"
+    android:versionName="0.9" >
 
-	<application android:icon="@drawable/icon" android:label="@string/app_name">
-		<activity android:name="MainActivity" android:label="@string/app_name"
-			android:multiprocess="true" android:configChanges="orientation|keyboardHidden">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-				<category android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>
-		</activity>
-		<activity android:name="MainDebugActivity" android:label="@string/app_name"
-			android:multiprocess="true" android:configChanges="orientation|keyboardHidden">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-			</intent-filter>
-		</activity>
-		<activity android:name="BrowserViewActivity" android:label="BrowserView"
-			android:multiprocess="true" android:configChanges="orientation|keyboardHidden"
-			android:theme="@android:style/Theme.Black.NoTitleBar" />
-		<activity android:name="AppPreferenceActivity"
-			android:multiprocess="true" android:configChanges="orientation|keyboardHidden"
-			android:theme="@android:style/Theme.Black.NoTitleBar" />
-	</application>
+    <uses-sdk android:minSdkVersion="7" />
+
+    <uses-permission android:name="android.permission.INTERNET" >
+    </uses-permission>
+
+    <application
+        android:icon="@drawable/icon"
+        android:label="@string/app_name" >
+        <activity
+            android:name="MainActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:label="@string/app_name"
+            android:multiprocess="true"
+            android:theme="@style/Theme.Custom" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="MainDebugActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:label="@string/app_name"
+            android:multiprocess="true"
+            android:theme="@style/Theme.Custom" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="BrowserViewActivity" android:launchMode="singleInstance"
+            android:configChanges="orientation|keyboardHidden"
+            android:label="BrowserView"
+            android:multiprocess="true"
+            android:theme="@style/Theme.Custom" />
+        <activity
+            android:name="AppPreferenceActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:multiprocess="true"
+            android:theme="@style/Theme.Custom" />
+    </application>
+
 </manifest>

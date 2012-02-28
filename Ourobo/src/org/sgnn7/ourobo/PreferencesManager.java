@@ -6,16 +6,15 @@ import android.content.res.Resources;
 import android.preference.PreferenceManager;
 
 public class PreferencesManager {
-	private final Context context;
 	private final Resources resources;
+	private final SharedPreferences preferences;
 
 	public PreferencesManager(Context context) {
-		this.context = context;
 		this.resources = context.getResources();
+		preferences = PreferenceManager.getDefaultSharedPreferences(context);
 	}
 
-	public <T> T getValue(int preferenceKey, Class<T> clazz) {
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-		return clazz.cast(preferences.getAll().get(resources.getString(preferenceKey)));
+	public String getString(int preferenceKey) {
+		return preferences.getString(resources.getString(preferenceKey), null);
 	}
 }

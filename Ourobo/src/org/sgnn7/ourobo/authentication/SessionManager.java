@@ -36,8 +36,8 @@ public class SessionManager {
 		boolean isLoggedIn = false;
 
 		if (getAuthenticationCookie() == null) {
-			String username = preferencesManager.getValue(R.string.preference_id_username, String.class);
-			String password = preferencesManager.getValue(R.string.preference_id_password, String.class);
+			String username = preferencesManager.getString(R.string.preference_id_username);
+			String password = preferencesManager.getString(R.string.preference_id_password);
 
 			if (isValidUsername(username) && isValidPassword(password)) {
 				AuthenticationResponse response = sendAuthenticationRequest(username, password);
