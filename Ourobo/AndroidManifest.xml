@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.sgnn7.ourobo"
-    android:versionCode="9"
-    android:versionName="0.9" >
+    android:versionCode="10"
+    android:versionName="0.10" >
 
     <uses-sdk android:minSdkVersion="7" />
 
-    <uses-permission android:name="android.permission.INTERNET" >
-    </uses-permission>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:icon="@drawable/icon"
@@ -35,9 +34,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="BrowserViewActivity" android:launchMode="singleInstance"
+            android:name="BrowserViewActivity"
             android:configChanges="orientation|keyboardHidden"
             android:label="BrowserView"
+            android:launchMode="singleInstance"
             android:multiprocess="true"
             android:theme="@style/Theme.Custom" />
         <activity
