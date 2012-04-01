@@ -4,7 +4,7 @@
     android:versionCode="10"
     android:versionName="0.10" >
 
-    <uses-sdk android:minSdkVersion="7" />
+    <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="7"/>
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -34,9 +34,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="BrowserViewActivity"
+            android:name=".BrowserActivity"
             android:configChanges="orientation|keyboardHidden"
-            android:label="BrowserView"
+            android:label="@string/browser_activity_name"
             android:launchMode="singleInstance"
             android:multiprocess="true"
             android:theme="@style/Theme.Custom" />

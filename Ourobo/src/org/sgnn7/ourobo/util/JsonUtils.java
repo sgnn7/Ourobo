@@ -78,7 +78,7 @@ public class JsonUtils {
 		public boolean handleUnknownProperty(DeserializationContext ctxt, JsonDeserializer<?> deserializer,
 				Object beanOrClass, String propertyName) throws IOException, JsonProcessingException {
 			ctxt.getParser().skipChildren();
-			LogMe.w("Unknown property " + propertyName + " skipped");
+			LogMe.v("Unknown property " + propertyName + " skipped");
 			return true;
 		}
 	}

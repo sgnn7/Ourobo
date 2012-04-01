@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Ourobo</string>
+    
+    <string name="browser_activity_name">Ourobo - Browser</string>
+    
     <string name="menu_refresh">Refresh</string>
     <string name="menu_switch_subreddit">Switch Subreddit</string>
     <string name="menu_preferences">Preferences</string>

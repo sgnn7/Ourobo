@@ -46,7 +46,7 @@ public class SubredditController {
 	public void reloadSubreddits(final ISubredditChangedListener subredditChangedListener) {
 		DownloadTask downloadTask = new DownloadTask(sessionManager) {
 			@Override
-			protected void onPostExecute(List<RedditPost> results) {
+			protected void onDownloadComplete(List<RedditPost> results) {
 				LogMe.e("Downloaded " + results.size() + " subreddit categories");
 
 				subredditList.clear();
@@ -82,7 +82,6 @@ public class SubredditController {
 				subredditSpinnerView.setAdapter(createNewSubredditAdapter());
 				subredditSpinnerView.setSelection(0);
 			}
-
 		};
 
 		String subreditUrl = dataSourceUrl + REDDITS_URL;

@@ -1,13 +1,16 @@
 package org.sgnn7.ourobo.util;
 
+import org.sgnn7.ourobo.BuildConfig;
+
 import android.util.Log;
 
 public class LogMe {
 	private static enum LogLevels {
-		ERROR, WARN, INFO, DEBUG
+		ERROR, WARN, INFO, DEBUG, VERBOSE
 	}
 
-	private static final LogLevels LOG_LEVEL = LogLevels.ERROR;
+	private static final LogLevels LOG_LEVEL = BuildConfig.DEBUG ? LogLevels.ERROR : LogLevels.ERROR;
+
 	private static final String PREFIX = "Ourobo";
 
 	public static void e(String value) {
@@ -30,6 +33,12 @@ public class LogMe {
 
 	public static void d(String value) {
 		if (logLevelAllows(LogLevels.DEBUG)) {
+			Log.d(PREFIX, value);
+		}
+	}
+
+	public static void v(String value) {
+		if (logLevelAllows(LogLevels.VERBOSE)) {
 			Log.d(PREFIX, value);
 		}
 	}

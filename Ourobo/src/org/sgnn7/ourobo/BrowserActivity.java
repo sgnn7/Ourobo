@@ -9,14 +9,16 @@ import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
+import android.webkit.WebSettings.ZoomDensity;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 
-public class BrowserViewActivity extends Activity {
-	public static final String LOCATION = "image.location";
+public class BrowserActivity extends Activity {
+	public static final String URL_PARAMETER_KEY = "image.location";
+
 	private WebView webView;
 
 	@Override
@@ -28,13 +30,9 @@ public class BrowserViewActivity extends Activity {
 		final RelativeLayout browserLayout = (RelativeLayout) findViewById(R.id.main_browser_view);
 
 		webView = new WebView(this);
+		webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY); // Hack for faulty APIs
 
-		// Hack for faulty APIs
-		webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-
-		RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(LayoutParams.FILL_PARENT,
-				LayoutParams.FILL_PARENT);
-		browserLayout.addView(webView, 0, layoutParams);
+		browserLayout.addView(webView, 0, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 
 		final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_meter);
 
@@ -70,10 +68,6 @@ public class BrowserViewActivity extends Activity {
 			}
 		});
 
-		webView.setBackgroundColor(Color.BLACK);
-		webView.setInitialScale(100);
-		webView.setWebViewClient(client);
-
 		WebSettings webSettings = webView.getSettings();
 		webSettings.setBuiltInZoomControls(true);
 		webSettings.setJavaScriptEnabled(true);
@@ -81,6 +75,7 @@ public class BrowserViewActivity extends Activity {
 		webSettings.setLoadsImagesAutomatically(true);
 		webSettings.setPluginsEnabled(true);
 		webSettings.setSupportZoom(true);
+		webSettings.setDefaultZoom(ZoomDensity.FAR);
 		webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
 
 		webSettings.setAllowFileAccess(true);
@@ -90,23 +85,27 @@ public class BrowserViewActivity extends Activity {
 		webSettings.setAppCachePath("/data/data/org.sgnn7.ourobo/cache");
 		webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
-		String destinationUrl = getIntent().getStringExtra(LOCATION);
-		webView.loadUrl(destinationUrl);
+		webView.setWebViewClient(client);
+		webView.setInitialScale(1);
+
+		loadIntentUrl();
 	}
 
 	@Override
 	protected void onNewIntent(Intent intent) {
+		loadIntentUrl();
+	}
+
+	private void loadIntentUrl() {
 		webView.clearHistory();
 		webView.setBackgroundColor(Color.BLACK);
 
-		String destinationUrl = getIntent().getStringExtra(LOCATION);
-		webView.loadUrl(destinationUrl);
+		webView.loadUrl(getIntent().getStringExtra(URL_PARAMETER_KEY));
 	}
 
 	@Override
 	public void onBackPressed() {
 		if (webView.canGoBack()) {
-
 			webView.goBack();
 		} else {
 			super.onBackPressed();

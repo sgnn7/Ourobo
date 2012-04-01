@@ -9,36 +9,43 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.sgnn7.ourobo.R;
 import org.sgnn7.ourobo.eventing.IImageLoadedListener;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
 public class ImageCacheManager {
+	private final static String MSFW_THUMBNAIL_ID = "nsfw";
+
 	private static Map<String, SoftReference<Drawable>> imageCache = new ConcurrentHashMap<String, SoftReference<Drawable>>();
 	private static Set<String> downloadList = Collections.synchronizedSet(new HashSet<String>());
 
-	private static ExecutorService executorService = Executors.newFixedThreadPool(10);
+	private static ExecutorService executorService = null;
 
-	public static void getImage(final String host, final String imageUrl, final IImageLoadedListener callback) {
-		boolean isValidImageUrl = imageUrl != null && imageUrl.length() > 0;
+	static {
+		createExecutorPool();
+	}
 
-		if (isValidImageUrl) {
-			if (isImageInMap(imageUrl)) {
-				LogMe.d("Cache hit on key: " + imageUrl);
+	public static void getImage(Resources resources, final String host, final String imageUrl,
+			final IImageLoadedListener callback) {
+		if (isImageInMap(imageUrl)) {
+			LogMe.d("Cache hit on key: " + imageUrl);
 
-				callback.finishedLoading(getDrawableFromCache(imageUrl));
-			} else {
-				LogMe.d("Cache miss on key: " + imageUrl);
+			callback.finishedLoading(getDrawableFromCache(imageUrl));
+		} else if (imageUrl.equals(MSFW_THUMBNAIL_ID)) {
+			callback.finishedLoading(resources.getDrawable(R.drawable.nswf));
+		} else {
+			LogMe.d("Cache miss on key: " + imageUrl);
 
-				executorService.execute(new Runnable() {
-					public void run() {
-						callback.finishedLoading(getImageSynced(host, imageUrl));
-					}
-				});
-			}
+			executorService.execute(new Runnable() {
+				public void run() {
+					callback.finishedLoading(getImageSynced(host, imageUrl));
+				}
+			});
 		}
 	}
 
@@ -93,19 +100,28 @@ public class ImageCacheManager {
 	private static void waitUntilOtherThreadDownloadsImage(String key) {
 		while (downloadList.contains(key)) {
 			try {
-				Thread.sleep(500);
+				Thread.sleep(150);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				LogMe.d("Interrupted waiting on image " + key);
 			}
 		}
 	}
 
-	public static void stopDownloads() {
-		clear();
+	public static void clear() {
+		stopDownloads();
+		imageCache.clear();
 	}
 
-	public static void clear() {
+	public static void stopDownloads() {
 		downloadList.clear();
-		imageCache.clear();
+		createExecutorPool();
+	}
+
+	private static void createExecutorPool() {
+		if (executorService != null) {
+			executorService.shutdownNow();
+		}
+
+		executorService = Executors.newFixedThreadPool(10);
 	}
 }
