@@ -108,6 +108,8 @@ public class BrowserActivity extends Activity {
 		if (webView.canGoBack()) {
 			webView.goBack();
 		} else {
+			webView.stopLoading();
+			webView.loadUrl("about:blank");
 			super.onBackPressed();
 		}
 	}
