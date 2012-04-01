@@ -9,6 +9,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.sgnn7.ourobo.authentication.SessionManager;
+import org.sgnn7.ourobo.eventing.IChangeEventListener;
 import org.sgnn7.ourobo.util.HttpUtils;
 import org.sgnn7.ourobo.util.JsonUtils;
 import org.sgnn7.ourobo.util.LogMe;
@@ -17,6 +18,10 @@ import android.os.AsyncTask;
 
 public abstract class DownloadTask extends AsyncTask<String, Void, List<RedditPost>> {
 	private final SessionManager sessionManager;
+
+	private boolean isTaskDone = false;
+
+	private IChangeEventListener taskDoneListener;
 
 	public DownloadTask(SessionManager sessionManager) {
 		this.sessionManager = sessionManager;
@@ -49,6 +54,24 @@ public abstract class DownloadTask extends AsyncTask<String, Void, List<RedditPo
 		return usablePosts;
 	}
 
+	public void addTaskDoneListener(IChangeEventListener listener) {
+		this.taskDoneListener = listener;
+	}
+
+	public boolean isTaskDone() {
+		return isTaskDone;
+	}
+
+	protected abstract void onDownloadComplete(List<RedditPost> results);
+
 	@Override
-	protected abstract void onPostExecute(List<RedditPost> results);
+	@Deprecated
+	protected void onPostExecute(List<RedditPost> result) {
+		onDownloadComplete(result);
+
+		isTaskDone = true;
+		if (taskDoneListener != null) {
+			taskDoneListener.handle();
+		}
+	}
 }

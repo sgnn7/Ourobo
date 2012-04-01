@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.sgnn7.ourobo.BrowserViewActivity;
+import org.sgnn7.ourobo.BrowserActivity;
 import org.sgnn7.ourobo.R;
 import org.sgnn7.ourobo.authentication.SessionManager;
 import org.sgnn7.ourobo.eventing.IChangeEventListener;
@@ -32,7 +32,7 @@ import android.widget.ViewSwitcher;
 public class RedditPostAdapter extends BaseAdapter {
 	private static final String PARAMETER_SEPARATOR = "&";
 
-	private static final int DEFAULT_POST_COUNT = 24;
+	private static final int DEFAULT_POST_COUNT = 15;
 	private static final String DEFAULT_SORTING_TYPE = "new";
 
 	private final List<RedditPost> redditPosts = new ArrayList<RedditPost>();
@@ -47,6 +47,8 @@ public class RedditPostAdapter extends BaseAdapter {
 
 	private final Drawable upvotedImage;
 	private final Drawable downvotedImage;
+
+	private DownloadTask currentDownloadTask = null;
 
 	public RedditPostAdapter(Activity activity, SessionManager sessionManager, String baseUrl, String dataLocationUri,
 			String mobileBaseUrl, IChangeEventListener finishedDownloadingListener) {
@@ -126,7 +128,7 @@ public class RedditPostAdapter extends BaseAdapter {
 				LogMe.e("Removing duplicate post: " + newRedditPost.getName());
 			}
 		}
-		viewedLinks.clear();
+		viewedLinks = null; // GC optimization
 
 		LogMe.e("Posts set. Add Size: " + newRedditPosts.size() + ". Total: " + redditPosts.size());
 		notifyDataSetChanged();
@@ -136,12 +138,23 @@ public class RedditPostAdapter extends BaseAdapter {
 		LogMe.e("Clearing view");
 		redditPosts.clear();
 
-		downloadTaskFactory.newDownloadTask().execute(dataLocationUrl, getParameterString());
+		downloadMoreContent();
 	}
 
 	public void downloadMoreContent() {
-		LogMe.i("Lazy loading more content...");
-		downloadTaskFactory.newDownloadTask().execute(dataLocationUrl, getParameterString());
+		LogMe.i("Loading more content...");
+
+		if (currentDownloadTask != null) {
+			stopDownloadTask();
+		}
+
+		currentDownloadTask = downloadTaskFactory.newDownloadTask();
+		currentDownloadTask.addTaskDoneListener(new IChangeEventListener() {
+			public void handle() {
+				currentDownloadTask = null;
+			}
+		});
+		currentDownloadTask.execute(dataLocationUrl, getParameterString());
 	}
 
 	public String getLastPostId() {
@@ -150,6 +163,14 @@ public class RedditPostAdapter extends BaseAdapter {
 
 	public void stopAllDownloads() {
 		ImageCacheManager.stopDownloads();
+		stopDownloadTask();
+	}
+
+	private void stopDownloadTask() {
+		if (currentDownloadTask != null && !currentDownloadTask.isCancelled()) {
+			currentDownloadTask.cancel(true);
+			currentDownloadTask = null;
+		}
 	}
 
 	private void setPostHolderValues(int index, final RedditPost redditPost, View postHolder) {
@@ -191,8 +212,8 @@ public class RedditPostAdapter extends BaseAdapter {
 				String commentsUrl = mobileBaseUrl + redditPost.getPermalink();
 				LogMe.e("Opening comments at: " + commentsUrl);
 
-				Intent targetIntent = new Intent(activity, BrowserViewActivity.class);
-				targetIntent.putExtra(BrowserViewActivity.LOCATION, commentsUrl);
+				Intent targetIntent = new Intent(activity, BrowserActivity.class);
+				targetIntent.putExtra(BrowserActivity.URL_PARAMETER_KEY, commentsUrl);
 				activity.startActivity(targetIntent);
 			}
 		});
@@ -272,8 +293,8 @@ public class RedditPostAdapter extends BaseAdapter {
 	}
 
 	private Intent getBrowserViewIntent(final RedditPost redditPost, final UrlFileType fileType) {
-		Intent targetIntent = new Intent(activity, BrowserViewActivity.class);
-		targetIntent.putExtra(BrowserViewActivity.LOCATION, injectRedditMobileUrls(redditPost.getUrl()));
+		Intent targetIntent = new Intent(activity, BrowserActivity.class);
+		targetIntent.putExtra(BrowserActivity.URL_PARAMETER_KEY, injectRedditMobileUrls(redditPost.getUrl()));
 		return targetIntent;
 	}
 

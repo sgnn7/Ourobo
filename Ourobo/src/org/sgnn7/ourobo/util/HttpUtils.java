@@ -7,7 +7,6 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.CookieStore;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -21,11 +20,17 @@ import org.sgnn7.ourobo.authentication.SessionManager;
 import org.sgnn7.ourobo.data.UrlFileType;
 
 public class HttpUtils {
-	private static final int DOWNLOAD_TIMEOUT = 30000;
+	private static final int DOWNLOAD_TIMEOUT = 20000;
 	private static final int CONNECTION_TIMEOUT = 5000;
 
 	public static String getPageContent(SessionManager sessionManager, String uri) {
 		return new String(getBinaryPageContent(sessionManager, uri));
+	}
+
+	public static byte[] getBinaryPageContent(SessionManager sessionManager, String host, String urlOrPath) {
+		boolean isRelativeLink = urlOrPath.startsWith("/");
+
+		return getBinaryPageContent(sessionManager, isRelativeLink ? host + urlOrPath : urlOrPath);
 	}
 
 	public static byte[] getBinaryPageContent(SessionManager sessionManager, String uri) {
@@ -44,7 +49,7 @@ public class HttpUtils {
 			LogMe.d(new String(pageContent));
 		} catch (OutOfMemoryError oome) {
 			System.gc();
-			LogMe.e("Cleaned garbage");
+			LogMe.e("OOM. Cleaned garbage");
 		} catch (Exception e) {
 			e.printStackTrace();
 			LogMe.e("Error while trying to retrieve '" + uri + "'");
@@ -59,8 +64,7 @@ public class HttpUtils {
 		if (sessionManager != null) {
 			Cookie authenticationCookie = sessionManager.getAuthenticationCookie();
 			if (authenticationCookie != null) {
-				CookieStore cookieStore = httpClient.getCookieStore();
-				cookieStore.addCookie(authenticationCookie);
+				httpClient.getCookieStore().addCookie(authenticationCookie);
 			}
 		}
 	}
@@ -90,17 +94,6 @@ public class HttpUtils {
 		return extension.toLowerCase();
 	}
 
-	public static byte[] getBinaryPageContent(SessionManager sessionManager, String host, String urlOrPath) {
-		byte[] content = null;
-		if (urlOrPath.startsWith("/")) {
-			content = getBinaryPageContent(sessionManager, host + urlOrPath);
-		} else {
-			content = getBinaryPageContent(sessionManager, urlOrPath);
-		}
-
-		return content;
-	}
-
 	public static String doPost(SessionManager sessionManager, String baseUrl, String path,
 			Map<String, String> parameterMap) {
 		DefaultHttpClient httpClient = new DefaultHttpClient();
@@ -124,6 +117,7 @@ public class HttpUtils {
 
 			HttpResponse response = httpClient.execute(httpPost);
 			responseContent = IOUtils.toString(response.getEntity().getContent());
+
 			LogMe.e("Response: " + responseContent);
 		} catch (Exception e) {
 			LogMe.e("Error posting values: " + e.getMessage());

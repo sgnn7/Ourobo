@@ -23,7 +23,7 @@ public class EventingWebViewClient extends WebViewClient {
 	private static final String MOBILE_YOUTUBE_SITE = "m.youtube.com/";
 	private static final String MAIN_YOUTUBE_SITE = "youtube.com/";
 
-	private static final String YOUTUBE_LINK_PREFIX = "vnd.youtube:";
+	private static final String YOUTUBE_LINK_PREFIX = "vnd.youtube://";
 	private static final String NO_MATCHING_INTENT = "Cannot find an app to handle this kind of link";
 
 	private final Activity activity;
@@ -56,15 +56,16 @@ public class EventingWebViewClient extends WebViewClient {
 
 	@Override
 	public boolean shouldOverrideUrlLoading(WebView view, String url) {
-		boolean overrideUrlLoading = false;
-
 		LogMe.d("Loading: " + url);
 
+		boolean overrideUrlLoading = false;
 		if (url.startsWith(YOUTUBE_LINK_PREFIX)) {
 			overrideUrlLoading = openYoutubeApp(url);
 		} else if (isYoutubeLink(url) && extractVideoId(url) != null) {
 			String modifiedUrl = YOUTUBE_LINK_PREFIX + extractVideoId(url);
+
 			LogMe.i("Modified URL: " + modifiedUrl);
+
 			overrideUrlLoading = openYoutubeApp(modifiedUrl);
 		}
 
@@ -83,7 +84,9 @@ public class EventingWebViewClient extends WebViewClient {
 
 	private String extractVideoId(String url) {
 		String videoId = Uri.parse(url).getQueryParameter(VIDEO_QUERY_PARAMETER);
+
 		LogMe.d("Video ID: " + videoId);
+
 		return videoId;
 	}
 
@@ -92,7 +95,9 @@ public class EventingWebViewClient extends WebViewClient {
 		if (isMobileYoutubeSite(url) || isMainYoutubeSite(url)) {
 			isYoutubeLink = true;
 		}
+
 		LogMe.e("Is youtube link: " + isYoutubeLink);
+
 		return isYoutubeLink;
 	}
 
@@ -107,18 +112,16 @@ public class EventingWebViewClient extends WebViewClient {
 	}
 
 	private boolean openYoutubeApp(String url) {
-		boolean overrideUrlLoading = false;
 		LogMe.e("YouTube link: " + url);
-		Intent urlIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-		List<ResolveInfo> list = activity.getPackageManager().queryIntentActivities(urlIntent,
-				PackageManager.MATCH_DEFAULT_ONLY);
 
-		if (list.size() != 0) {
+		boolean overrideUrlLoading = false;
+		if (canHandleYoutubeLinks(url)) {
 			try {
 				Intent videoIntent = new Intent(Intent.ACTION_VIEW);
 				videoIntent.setData(Uri.parse(url));
 
 				activity.startActivity(videoIntent);
+				activity.finish();
 
 				overrideUrlLoading = true;
 			} catch (ActivityNotFoundException anfe) {
@@ -129,6 +132,14 @@ public class EventingWebViewClient extends WebViewClient {
 		}
 
 		return overrideUrlLoading;
+	}
+
+	private boolean canHandleYoutubeLinks(String url) {
+		Intent urlIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+		PackageManager packageManager = activity.getPackageManager();
+
+		List<ResolveInfo> list = packageManager.queryIntentActivities(urlIntent, PackageManager.MATCH_DEFAULT_ONLY);
+		return !list.isEmpty();
 	}
 
 	private void displayAndLogIntentError(ActivityNotFoundException anfe) {

@@ -8,7 +8,7 @@ public abstract class DownloadTaskFactory {
 	public DownloadTask newDownloadTask() {
 		return new DownloadTask(getSessionManager()) {
 			@Override
-			protected void onPostExecute(List<RedditPost> results) {
+			protected void onDownloadComplete(List<RedditPost> results) {
 				onPostExecuteDownloadTask(results);
 			}
 		};
