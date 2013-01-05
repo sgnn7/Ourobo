@@ -18,6 +18,7 @@ import org.sgnn7.ourobo.util.LogMe;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -31,14 +32,15 @@ import android.widget.ViewSwitcher;
 
 public class RedditPostAdapter extends BaseAdapter {
 	private static final String PARAMETER_SEPARATOR = "&";
+	private static final String DEFAULT_SORTING_TYPE = "new";
 
 	private static final int DEFAULT_POST_COUNT = 15;
-	private static final String DEFAULT_SORTING_TYPE = "new";
 
 	private final List<RedditPost> redditPosts = new ArrayList<RedditPost>();
 
-	private final SessionManager sessionManager;
 	private final DownloadTaskFactory downloadTaskFactory;
+	private final SessionManager sessionManager;
+	private final Resources resources;
 	private final Activity activity;
 
 	private final String baseUrl;
@@ -53,6 +55,7 @@ public class RedditPostAdapter extends BaseAdapter {
 	public RedditPostAdapter(Activity activity, SessionManager sessionManager, String baseUrl, String dataLocationUri,
 			String mobileBaseUrl, IChangeEventListener finishedDownloadingListener) {
 		this.activity = activity;
+		resources = activity.getResources();
 		this.downloadTaskFactory = createDownloadTaskFactory(finishedDownloadingListener);
 		this.baseUrl = baseUrl;
 		this.dataLocationUrl = dataLocationUri;
@@ -70,7 +73,9 @@ public class RedditPostAdapter extends BaseAdapter {
 				if (!results.isEmpty()) {
 					addPosts(results);
 				} else {
-					Toast.makeText(activity, "Could not retrieve json data", Toast.LENGTH_LONG).show();
+					Toast.makeText(activity, "Could not retrieve data", Toast.LENGTH_LONG).show();
+					// Could cause DDOS
+					// this.newDownloadTask();
 				}
 				finishedDownloadingListener.handle();
 			}
@@ -85,9 +90,7 @@ public class RedditPostAdapter extends BaseAdapter {
 	}
 
 	public int getCount() {
-		int numberOfPosts;
-		numberOfPosts = redditPosts.size();
-		return numberOfPosts;
+		return redditPosts.size();
 	}
 
 	public Object getItem(int position) {
@@ -101,14 +104,11 @@ public class RedditPostAdapter extends BaseAdapter {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		RedditPost redditPost = redditPosts.get(position);
 
-		View redditPostHolder = null;
-		// Does not work for some reason :(
-		// if (convertView == null) {
-		LogMe.i("Creating view: " + redditPost.getTitle());
-		redditPostHolder = activity.getLayoutInflater().inflate(R.layout.post_layout, parent, false);
-		// } else {
-		// redditPostHolder = convertView;
-		// }
+		View redditPostHolder = convertView;
+		if (redditPostHolder == null) {
+			LogMe.d("Creating view: " + redditPost.getTitle());
+			redditPostHolder = activity.getLayoutInflater().inflate(R.layout.post_layout, parent, false);
+		}
 
 		setPostHolderValues(position, redditPost, redditPostHolder);
 		redditPostHolder.invalidate();
@@ -137,6 +137,7 @@ public class RedditPostAdapter extends BaseAdapter {
 	public void refreshViews() {
 		LogMe.e("Clearing view");
 		redditPosts.clear();
+		notifyDataSetChanged();
 
 		downloadMoreContent();
 	}
@@ -174,6 +175,7 @@ public class RedditPostAdapter extends BaseAdapter {
 	}
 
 	private void setPostHolderValues(int index, final RedditPost redditPost, View postHolder) {
+
 		TextView titleView = (TextView) postHolder.findViewById(R.id.post_title);
 		String title = sanitizeString(redditPost.getTitle().trim());
 		titleView.setText(title);
@@ -182,8 +184,8 @@ public class RedditPostAdapter extends BaseAdapter {
 
 		final UrlFileType fileType = HttpUtils.getFileType(redditPost.getUrl());
 
-		postHolder.setBackgroundDrawable(activity.getResources().getDrawable(
-				getBackgroundIdBasedOnTypeAndIndex(fileType, index)));
+		postHolder.setBackgroundDrawable(resources.getDrawable(index % 2 == 0 ? R.drawable.gray_post_style
+				: R.drawable.blue_post_style));
 		postHolder.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				stopAllDownloads();
@@ -191,18 +193,31 @@ public class RedditPostAdapter extends BaseAdapter {
 			}
 		});
 
-		boolean isImageUrl = fileType.equals(UrlFileType.IMAGE);
-
 		ViewSwitcher thumbnailHolder = (ViewSwitcher) postHolder.findViewById(R.id.post_thumbnail_holder);
 		final ImageView thumbnail = (ImageView) thumbnailHolder.findViewById(R.id.post_thumbnail);
 
+		thumbnail.setImageDrawable(null);
+		thumbnail.setTag(redditPost.getName());
+		thumbnailHolder.setDisplayedChild(0);
+		RelativeLayout.LayoutParams thumbnailHolderLayoutParams = new RelativeLayout.LayoutParams(
+				thumbnailHolder.getLayoutParams());
+		thumbnailHolderLayoutParams.width = (int) resources.getDimension(R.dimen.thumbnail_holder_width);
+		thumbnailHolderLayoutParams.height = (int) resources.getDimension(R.dimen.thumbnail_holder_height);
+		thumbnailHolderLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+		thumbnailHolder.setLayoutParams(thumbnailHolderLayoutParams);
+		thumbnailHolder.forceLayout();
+		thumbnailHolder.invalidate();
+
 		AsyncThumbnailLoader thumbnailLazyLoader = new AsyncThumbnailLoader(postHolder, thumbnailHolder, thumbnail,
-				baseUrl);
-		if (isImageUrl) {
-			thumbnailLazyLoader.loadImage(activity, redditPost.getUrl());
-		} else {
-			thumbnailLazyLoader.loadImage(activity, redditPost.getThumbnail());
-		}
+				baseUrl, redditPost.getName());
+
+		// TODO - This is too slow
+		// boolean isImageUrl = fileType.equals(UrlFileType.IMAGE);
+		// if (isImageUrl) {
+		// thumbnailLazyLoader.loadImage(activity, redditPost.getUrl());
+		// } else {
+		thumbnailLazyLoader.loadImage(activity, redditPost.getThumbnail());
+		// }
 
 		RelativeLayout scoreHolder = (RelativeLayout) postHolder.findViewById(R.id.post_score_holder);
 		scoreHolder.setOnClickListener(new OnClickListener() {
@@ -300,10 +315,5 @@ public class RedditPostAdapter extends BaseAdapter {
 
 	private String injectRedditMobileUrls(String url) {
 		return url.replace(baseUrl, mobileBaseUrl);
-	}
-
-	private int getBackgroundIdBasedOnTypeAndIndex(UrlFileType fileType, int index) {
-		boolean isOddPostNumber = index % 2 == 0;
-		return isOddPostNumber ? R.drawable.gray_post_style : R.drawable.blue_post_style;
 	}
 }

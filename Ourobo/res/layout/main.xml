@@ -5,6 +5,7 @@
     android:background="@color/blue_post_center_color" >
 
     <ProgressBar
+        android:id="@+id/main_screen_progress_bar"
         style="@android:style/Widget.ProgressBar.Large.Inverse"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -59,10 +60,10 @@
         </RelativeLayout>
 
         <ImageView
-            android:contentDescription="@android:string/unknownName"
             android:layout_width="fill_parent"
             android:layout_height="@dimen/two_pixels"
             android:background="@android:color/transparent"
+            android:contentDescription="@android:string/unknownName"
             android:scaleType="fitXY"
             android:src="@drawable/divider" />
 

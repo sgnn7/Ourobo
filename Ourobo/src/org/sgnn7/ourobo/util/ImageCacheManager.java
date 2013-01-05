@@ -19,6 +19,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
 public class ImageCacheManager {
+	private static final int EXECUTOR_THREAD_COUNT = 20;
+
 	private final static String MSFW_THUMBNAIL_ID = "nsfw";
 
 	private static Map<String, SoftReference<Drawable>> imageCache = new ConcurrentHashMap<String, SoftReference<Drawable>>();
@@ -122,6 +124,6 @@ public class ImageCacheManager {
 			executorService.shutdownNow();
 		}
 
-		executorService = Executors.newFixedThreadPool(10);
+		executorService = Executors.newFixedThreadPool(EXECUTOR_THREAD_COUNT);
 	}
 }

@@ -1,4 +1,6 @@
 
     <resources>
         <dimen name="two_pixels">2px</dimen>
+        <dimen name="thumbnail_holder_height">60dip</dimen>
+        <dimen name="thumbnail_holder_width">60dip</dimen>
     </resources>

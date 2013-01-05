@@ -19,9 +19,9 @@ import android.os.AsyncTask;
 public abstract class DownloadTask extends AsyncTask<String, Void, List<RedditPost>> {
 	private final SessionManager sessionManager;
 
-	private boolean isTaskDone = false;
-
 	private IChangeEventListener taskDoneListener;
+	private String uri;
+	private boolean isTaskDone = false;
 
 	public DownloadTask(SessionManager sessionManager) {
 		this.sessionManager = sessionManager;
@@ -32,26 +32,30 @@ public abstract class DownloadTask extends AsyncTask<String, Void, List<RedditPo
 		List<RedditPost> posts = new ArrayList<RedditPost>();
 		try {
 			String getParameters = params.length < 2 ? "" : params[1];
+			uri = params[0] + getParameters;
 
-			String pageContent = HttpUtils.getPageContent(sessionManager, params[0] + getParameters);
+			String pageContent = HttpUtils.getPageContent(sessionManager, uri);
 			LogMe.d("Content: " + pageContent);
 			posts = getRedditPostsFromContent(pageContent);
 			LogMe.e("Posts: " + posts.size());
 		} catch (Exception e) {
-			LogMe.e(e.getClass().getName() + ": " + e.getMessage());
-			e.printStackTrace();
+			LogMe.e("Failed to retrieve uri: " + uri);
+			LogMe.e(e);
 		}
 		return posts;
 	}
 
 	private List<RedditPost> getRedditPostsFromContent(String pageContent) throws IOException, JsonParseException,
 			JsonMappingException {
-		LogMe.d(pageContent);
+		if (pageContent == null) {
+			throw new IOException("Json was empty. Will not try to deserialize");
+		}
+
+		LogMe.d("Json: " + pageContent);
 		JsonNode topNode = new ObjectMapper().readValue(pageContent, JsonNode.class);
 		List<JsonNode> posts = JsonUtils.getJsonChildren(topNode, "data/children");
 		LogMe.d("Json Size: " + posts.size());
-		List<RedditPost> usablePosts = JsonUtils.convertJsonPostsToObjects(posts);
-		return usablePosts;
+		return JsonUtils.convertJsonPostsToObjects(posts);
 	}
 
 	public void addTaskDoneListener(IChangeEventListener listener) {
@@ -72,6 +76,13 @@ public abstract class DownloadTask extends AsyncTask<String, Void, List<RedditPo
 		isTaskDone = true;
 		if (taskDoneListener != null) {
 			taskDoneListener.handle();
+			LogMe.w("Task done - " + uri);
 		}
+	}
+
+	@Override
+	protected void onCancelled() {
+		LogMe.w("Task canceled - " + uri);
+		onPostExecute(new ArrayList<RedditPost>());
 	}
 }

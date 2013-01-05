@@ -113,4 +113,18 @@ public class BrowserActivity extends Activity {
 			super.onBackPressed();
 		}
 	}
+
+	@Override
+	protected void onPause() {
+		webView.stopLoading();
+
+		super.onPause();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		webView.resumeTimers();
+	}
 }

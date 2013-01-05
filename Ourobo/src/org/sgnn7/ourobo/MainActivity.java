@@ -17,6 +17,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -69,6 +71,12 @@ public class MainActivity extends Activity {
 			}
 		};
 		subredditController.reloadSubreddits(subredditChangedListener);
+
+		findViewById(R.id.main_screen_progress_bar).setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				refreshPosts();
+			}
+		});
 	}
 
 	private void attachListAdapterToListView(SessionManager sessionManager, String newSubreddit) {
@@ -105,7 +113,7 @@ public class MainActivity extends Activity {
 			postView.setAdapter(redditPostAdapter);
 			postView.setOnScrollListener(lazyLoadingListener);
 
-			redditPostAdapter.refreshViews();
+			// redditPostAdapter.refreshViews();
 		}
 	}
 
@@ -130,10 +138,7 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_refresh:
-			if (redditPostAdapter != null) {
-				redditPostAdapter.stopAllDownloads();
-				redditPostAdapter.refreshViews();
-			}
+			refreshPosts();
 
 			if (subredditController != null) {
 				subredditController.reloadSubreddits(subredditChangedListener);
@@ -165,6 +170,13 @@ public class MainActivity extends Activity {
 				}).create();
 
 		alertDialog.show();
+	}
+
+	private void refreshPosts() {
+		if (redditPostAdapter != null) {
+			redditPostAdapter.stopAllDownloads();
+			redditPostAdapter.refreshViews();
+		}
 	}
 
 	protected String getMainUrl() {

@@ -38,6 +38,7 @@ public class HttpUtils {
 
 		byte[] pageContent = null;
 		try {
+			LogMe.d("Loading page " + uri);
 			HttpGet page = new HttpGet(uri);
 
 			DefaultHttpClient httpClient = new DefaultHttpClient();
@@ -45,8 +46,8 @@ public class HttpUtils {
 
 			HttpResponse response = httpClient.execute(page);
 			pageContent = IOUtils.toByteArray(response.getEntity().getContent());
-			LogMe.d("Size: " + pageContent.length);
-			LogMe.d(new String(pageContent));
+			LogMe.d("Loaded (" + pageContent.length + ") " + uri);
+			// LogMe.d(new String(pageContent));
 		} catch (OutOfMemoryError oome) {
 			System.gc();
 			LogMe.e("OOM. Cleaned garbage");

@@ -9,7 +9,7 @@ public class LogMe {
 		ERROR, WARN, INFO, DEBUG, VERBOSE
 	}
 
-	private static final LogLevels LOG_LEVEL = BuildConfig.DEBUG ? LogLevels.ERROR : LogLevels.ERROR;
+	private static final LogLevels LOG_LEVEL = BuildConfig.DEBUG ? LogLevels.DEBUG : LogLevels.ERROR;
 
 	private static final String PREFIX = "Ourobo";
 

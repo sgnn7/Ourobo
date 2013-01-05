@@ -6,7 +6,9 @@ import org.sgnn7.ourobo.util.LogMe;
 import android.app.Activity;
 import android.content.res.Resources;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.ViewSwitcher;
 
 public class AsyncThumbnailLoader {
@@ -14,12 +16,15 @@ public class AsyncThumbnailLoader {
 	private final ImageView thumbnail;
 	private final View postHolder;
 	private final String host;
+	private final String id;
 
-	public AsyncThumbnailLoader(View postHolder, ViewSwitcher thumbnailHolder, ImageView thumbnail, String host) {
+	public AsyncThumbnailLoader(View postHolder, ViewSwitcher thumbnailHolder, ImageView thumbnail, String host,
+			String id) {
 		this.postHolder = postHolder;
 		this.thumbnailHolder = thumbnailHolder;
 		this.thumbnail = thumbnail;
 		this.host = host;
+		this.id = id;
 	}
 
 	public void loadImage(Activity activity, String imageUrl) {
@@ -30,10 +35,16 @@ public class AsyncThumbnailLoader {
 			LogMe.i("Loading image " + imageUrl);
 
 			ImageCacheManager.getImage(resources, host, imageUrl, new UpdateUiImageLoadedListener(activity,
-					thumbnailHolder, thumbnail));
-		} else {
-			thumbnailHolder.setVisibility(View.GONE);
+					thumbnailHolder, thumbnail, id));
+		} else if (thumbnail.getTag().equals(id)) {
+			LayoutParams layoutParams = new RelativeLayout.LayoutParams(thumbnailHolder.getLayoutParams());
+			layoutParams.width = 0;
+			layoutParams.height = 0;
+
+			thumbnailHolder.setLayoutParams(layoutParams);
+
+			postHolder.forceLayout();
+			postHolder.invalidate();
 		}
-		postHolder.requestLayout();
 	}
 }
