@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
+import android.webkit.WebSettings.LayoutAlgorithm;
 import android.webkit.WebSettings.ZoomDensity;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
@@ -84,9 +85,9 @@ public class BrowserActivity extends Activity {
 		webSettings.setAppCacheEnabled(true);
 		webSettings.setAppCachePath("/data/data/org.sgnn7.ourobo/cache");
 		webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
+		webSettings.setLayoutAlgorithm(LayoutAlgorithm.SINGLE_COLUMN);
 
 		webView.setWebViewClient(client);
-		webView.setInitialScale(1);
 
 		loadIntentUrl();
 	}
