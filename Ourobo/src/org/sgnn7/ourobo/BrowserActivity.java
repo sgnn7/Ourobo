@@ -94,6 +94,9 @@ public class BrowserActivity extends Activity {
 
 	@Override
 	protected void onNewIntent(Intent intent) {
+		setIntent(intent);
+		super.onNewIntent(intent);
+
 		loadIntentUrl();
 	}
 
