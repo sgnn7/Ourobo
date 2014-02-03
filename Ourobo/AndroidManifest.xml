@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.sgnn7.ourobo"
-    android:versionCode="11"
-    android:versionName="0.11" >
+    android:versionCode="12"
+    android:versionName="0.12" >
 
-    <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="7"/>
+    <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="8"/>
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -28,6 +28,7 @@
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/app_name"
             android:multiprocess="true"
+            android:exported="false"
             android:theme="@style/Theme.Custom" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
