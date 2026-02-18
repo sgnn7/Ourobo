@@ -5,4 +5,4 @@
 Ourobo
 ======
 
-Reddit Android 2.1+ client. Does basic functionality with possible plans to make it a full fledged client
+Reddit Android 4.1+ client. Does basic functionality with possible plans to make it a full fledged client
