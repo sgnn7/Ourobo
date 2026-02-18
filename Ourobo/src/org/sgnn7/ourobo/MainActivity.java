@@ -9,8 +9,10 @@ import org.sgnn7.ourobo.eventing.LazyLoadingListener;
 import org.sgnn7.ourobo.util.ImageCacheManager;
 import org.sgnn7.ourobo.util.LogMe;
 
-import android.app.Activity;
-import android.app.AlertDialog;
+import androidx.activity.OnBackPressedCallback;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,13 +21,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.Window;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 
-public class MainActivity extends Activity {
-	protected static final String HTTP_PROTOCOL_PREFIX = "http://";
+public class MainActivity extends AppCompatActivity {
+	protected static final String HTTP_PROTOCOL_PREFIX = "https://";
 
 	private static final String REDDIT_HOST = "reddit.com";
 
@@ -51,9 +52,23 @@ public class MainActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-
 		setContentView(R.layout.main);
+
+		getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+			@Override
+			public void handleOnBackPressed() {
+				new AlertDialog.Builder(MainActivity.this).setIcon(android.R.drawable.btn_dialog)
+						.setTitle("Exit App").setMessage("Are you sure you want to exit the app?")
+						.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int whichButton) {
+								MainActivity.this.moveTaskToBack(true);
+							}
+						}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int whichButton) {
+							}
+						}).show();
+			}
+		});
 
 		final SessionManager sessionManager = new SessionManager(this, MAIN_URL, new PreferencesManager(this));
 
@@ -136,40 +151,24 @@ public class MainActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.menu_refresh:
+		int id = item.getItemId();
+		if (id == R.id.menu_refresh) {
 			refreshPosts();
 
 			if (subredditController != null) {
 				subredditController.reloadSubreddits(subredditChangedListener);
 			}
 			return true;
-		case R.id.menu_switch_subreddit:
+		} else if (id == R.id.menu_switch_subreddit) {
 			Spinner subredditSpinner = (Spinner) findViewById(R.id.subreddit_spinner);
 			subredditSpinner.performClick();
 			return true;
-		case R.id.menu_preferences:
+		} else if (id == R.id.menu_preferences) {
 			startActivity(new Intent(this, AppPreferenceActivity.class));
 			return true;
-		default:
+		} else {
 			return super.onOptionsItemSelected(item);
 		}
-	}
-
-	@Override
-	public void onBackPressed() {
-		AlertDialog alertDialog = new AlertDialog.Builder(this).setIcon(android.R.drawable.btn_dialog)
-				.setTitle("Exit App").setMessage("Are you sure you want to exit the app?")
-				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						MainActivity.this.moveTaskToBack(true);
-					}
-				}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-					}
-				}).create();
-
-		alertDialog.show();
 	}
 
 	private void refreshPosts() {

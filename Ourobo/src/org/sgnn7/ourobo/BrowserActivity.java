@@ -2,7 +2,9 @@ package org.sgnn7.ourobo;
 
 import org.sgnn7.ourobo.eventing.IChangeEventListener;
 
-import android.app.Activity;
+import androidx.activity.OnBackPressedCallback;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -10,14 +12,12 @@ import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebSettings.LayoutAlgorithm;
-import android.webkit.WebSettings.ZoomDensity;
-import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 
-public class BrowserActivity extends Activity {
+public class BrowserActivity extends AppCompatActivity {
 	public static final String URL_PARAMETER_KEY = "image.location";
 
 	private WebView webView;
@@ -31,9 +31,9 @@ public class BrowserActivity extends Activity {
 		final RelativeLayout browserLayout = (RelativeLayout) findViewById(R.id.main_browser_view);
 
 		webView = new WebView(this);
-		webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY); // Hack for faulty APIs
+		webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
 
-		browserLayout.addView(webView, 0, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+		browserLayout.addView(webView, 0, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
 		final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_meter);
 
@@ -61,33 +61,38 @@ public class BrowserActivity extends Activity {
 			public void onProgressChanged(WebView view, int progress) {
 				progressBar.setProgress(progress);
 			}
-
-			@Override
-			public void onReachedMaxAppCacheSize(long spaceNeeded, long totalUsedQuota,
-					WebStorage.QuotaUpdater quotaUpdater) {
-				quotaUpdater.updateQuota(spaceNeeded * 2);
-			}
 		});
 
 		WebSettings webSettings = webView.getSettings();
 		webSettings.setBuiltInZoomControls(true);
+		webSettings.setDisplayZoomControls(false);
 		webSettings.setJavaScriptEnabled(true);
 		webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
 		webSettings.setLoadsImagesAutomatically(true);
-		webSettings.setPluginsEnabled(true);
 		webSettings.setSupportZoom(true);
-		webSettings.setDefaultZoom(ZoomDensity.FAR);
-		webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
+		webView.setInitialScale(1);
+		webSettings.setUseWideViewPort(true);
+		webSettings.setLoadWithOverviewMode(true);
 
 		webSettings.setAllowFileAccess(true);
 		webSettings.setDomStorageEnabled(true);
-		webSettings.setAppCacheMaxSize(16 * 1024 * 1024);
-		webSettings.setAppCacheEnabled(true);
-		webSettings.setAppCachePath("/data/data/org.sgnn7.ourobo/cache");
 		webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
-		webSettings.setLayoutAlgorithm(LayoutAlgorithm.SINGLE_COLUMN);
+		webSettings.setLayoutAlgorithm(LayoutAlgorithm.TEXT_AUTOSIZING);
 
 		webView.setWebViewClient(client);
+
+		getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+			@Override
+			public void handleOnBackPressed() {
+				if (webView.canGoBack()) {
+					webView.goBack();
+				} else {
+					webView.stopLoading();
+					webView.loadUrl("about:blank");
+					finish();
+				}
+			}
+		});
 
 		loadIntentUrl();
 	}
@@ -105,17 +110,6 @@ public class BrowserActivity extends Activity {
 		webView.setBackgroundColor(Color.BLACK);
 
 		webView.loadUrl(getIntent().getStringExtra(URL_PARAMETER_KEY));
-	}
-
-	@Override
-	public void onBackPressed() {
-		if (webView.canGoBack()) {
-			webView.goBack();
-		} else {
-			webView.stopLoading();
-			webView.loadUrl("about:blank");
-			super.onBackPressed();
-		}
 	}
 
 	@Override

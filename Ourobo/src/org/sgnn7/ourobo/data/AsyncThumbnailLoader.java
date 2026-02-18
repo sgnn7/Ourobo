@@ -1,10 +1,10 @@
 package org.sgnn7.ourobo.data;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.sgnn7.ourobo.util.ImageCacheManager;
 import org.sgnn7.ourobo.util.LogMe;
 
 import android.app.Activity;
-import android.content.res.Resources;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
@@ -28,13 +28,15 @@ public class AsyncThumbnailLoader {
 	}
 
 	public void loadImage(Activity activity, String imageUrl) {
-		Resources resources = activity.getResources();
-
-		boolean isValidImageUrl = imageUrl != null && imageUrl.length() > 0;
+		boolean isValidImageUrl = imageUrl != null && imageUrl.startsWith("http");
 		if (isValidImageUrl) {
-			LogMe.i("Loading image " + imageUrl);
+			String sanitizedUrl = StringEscapeUtils.unescapeHtml4(imageUrl);
+			if (sanitizedUrl.startsWith("http://")) {
+				sanitizedUrl = "https" + sanitizedUrl.substring(4);
+			}
+			LogMe.i("Loading image " + sanitizedUrl);
 
-			ImageCacheManager.getImage(resources, host, imageUrl, new UpdateUiImageLoadedListener(activity,
+			ImageCacheManager.getImage(activity, host, sanitizedUrl, new UpdateUiImageLoadedListener(activity,
 					thumbnailHolder, thumbnail, id));
 		} else if (thumbnail.getTag().equals(id)) {
 			LayoutParams layoutParams = new RelativeLayout.LayoutParams(thumbnailHolder.getLayoutParams());

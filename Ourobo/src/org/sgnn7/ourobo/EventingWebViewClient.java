@@ -12,6 +12,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
@@ -19,6 +21,7 @@ import android.widget.Toast;
 public class EventingWebViewClient extends WebViewClient {
 	private static final String WWW_PREFIX = "www.";
 	private static final String VIDEO_QUERY_PARAMETER = "v";
+	private static final String HTTPS_PROTOCOL_PREFIX = "https://";
 	private static final String HTTP_PROTOCOL_PREFIX = "http://";
 	private static final String MOBILE_YOUTUBE_SITE = "m.youtube.com/";
 	private static final String MAIN_YOUTUBE_SITE = "youtube.com/";
@@ -55,7 +58,8 @@ public class EventingWebViewClient extends WebViewClient {
 	}
 
 	@Override
-	public boolean shouldOverrideUrlLoading(WebView view, String url) {
+	public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+		String url = request.getUrl().toString();
 		LogMe.d("Loading: " + url);
 
 		boolean overrideUrlLoading = false;
@@ -73,8 +77,10 @@ public class EventingWebViewClient extends WebViewClient {
 	}
 
 	@Override
-	public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-		errorOccuredListener.handle();
+	public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+		if (request.isForMainFrame()) {
+			errorOccuredListener.handle();
+		}
 	}
 
 	@Override
@@ -102,11 +108,15 @@ public class EventingWebViewClient extends WebViewClient {
 	}
 
 	private boolean isMobileYoutubeSite(String url) {
-		return url.startsWith(HTTP_PROTOCOL_PREFIX + MOBILE_YOUTUBE_SITE) || url.startsWith(MOBILE_YOUTUBE_SITE);
+		return url.startsWith(HTTPS_PROTOCOL_PREFIX + MOBILE_YOUTUBE_SITE)
+				|| url.startsWith(HTTP_PROTOCOL_PREFIX + MOBILE_YOUTUBE_SITE)
+				|| url.startsWith(MOBILE_YOUTUBE_SITE);
 	}
 
 	private boolean isMainYoutubeSite(String url) {
-		return url.startsWith(HTTP_PROTOCOL_PREFIX + MAIN_YOUTUBE_SITE)
+		return url.startsWith(HTTPS_PROTOCOL_PREFIX + MAIN_YOUTUBE_SITE)
+				|| url.startsWith(HTTPS_PROTOCOL_PREFIX + WWW_PREFIX + MAIN_YOUTUBE_SITE)
+				|| url.startsWith(HTTP_PROTOCOL_PREFIX + MAIN_YOUTUBE_SITE)
 				|| url.startsWith(HTTP_PROTOCOL_PREFIX + WWW_PREFIX + MAIN_YOUTUBE_SITE)
 				|| url.startsWith(MAIN_YOUTUBE_SITE);
 	}

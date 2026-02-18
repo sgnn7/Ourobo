@@ -1,32 +1,37 @@
--target 1.6
 -optimizationpasses 5
 -dontusemixedcaseclassnames
--dontskipnonpubliclibraryclasses
--dontskipnonpubliclibraryclassmembers
--dontpreverify
 -repackageclasses ''
 -allowaccessmodification
 -verbose
--dump class_files.txt 
--printseeds seeds.txt 
--printusage unused.txt 
--printmapping mapping.txt 
+
 -optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
+
 -keepattributes *Annotation*
 
-#-dontwarn com.j256.**
--dontwarn org.codehaus.**
+# Jackson 2.x
+-dontwarn com.fasterxml.jackson.**
+-keep class com.fasterxml.jackson.** { *; }
+-keepclassmembers class * {
+    @com.fasterxml.jackson.annotation.* *;
+}
 
-#Make sure that persisted classes aren't mangled
--keep class org.sgnn7.data.**
+# Keep data model classes for Jackson deserialization
+-keep class org.sgnn7.ourobo.data.RedditPost { *; }
+-keep class org.sgnn7.ourobo.data.AuthenticationResponse { *; }
 
+# OkHttp
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-keep class okhttp3.** { *; }
+
+# Standard Android keeps
 -keep public class * extends android.app.Activity
 -keep public class * extends android.app.Application
 -keep public class * extends android.app.Service
 -keep public class * extends android.content.BroadcastReceiver
 -keep public class * extends android.content.ContentProvider
 -keep public class * extends android.app.backup.BackupAgentHelper
--keep public class * extends android.preference.Preference
+-keep public class * extends androidx.preference.Preference
 
 -keepclassmembers class * extends android.app.Activity {
    public void *(android.view.View);
@@ -44,7 +49,7 @@
     public <init>(android.content.Context, android.util.AttributeSet, int);
 }
 
--keep public class * extends android.view.View { 
+-keep public class * extends android.view.View {
     public <init>(android.content.Context);
     public <init>(android.content.Context, android.util.AttributeSet);
     public <init>(android.content.Context, android.util.AttributeSet, int);
@@ -57,23 +62,9 @@
 }
 
 -keep class * implements android.os.Parcelable {
-  public static final android.os.Parcelable$Creator *;
+    public static final android.os.Parcelable$Creator *;
 }
 
 -keepclassmembers class **.R$* {
     public static <fields>;
 }
-
-#-keep class com.j256.** 
-#-keepclassmembers class com.j256.** 
-#-keep enum com.j256.** 
-#-keepclassmembers enum com.j256.** 
-#-keep interface com.j256.** 
-#-keepclassmembers interface com.j256.** 
-
--keep class org.codehaus.** 
--keepclassmembers class org.codehaus.** 
--keep enum org.codehaus.** 
--keepclassmembers enum org.codehaus.** 
--keep interface org.codehaus.** 
--keepclassmembers interface org.codehaus.** 

@@ -1,35 +1,39 @@
 package org.sgnn7.ourobo.util;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.protocol.HTTP;
 import org.sgnn7.ourobo.authentication.SessionManager;
 import org.sgnn7.ourobo.data.UrlFileType;
 
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+
 public class HttpUtils {
-	private static final int DOWNLOAD_TIMEOUT = 20000;
-	private static final int CONNECTION_TIMEOUT = 5000;
+	private static final int DOWNLOAD_TIMEOUT = 20;
+	private static final int CONNECTION_TIMEOUT = 5;
+
+	private static final String USER_AGENT = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36";
+
+	private static final OkHttpClient client = new OkHttpClient.Builder()
+			.connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
+			.readTimeout(DOWNLOAD_TIMEOUT, TimeUnit.SECONDS)
+			.addInterceptor(chain -> chain.proceed(
+					chain.request().newBuilder()
+							.header("User-Agent", USER_AGENT)
+							.build()))
+			.build();
 
 	public static String getPageContent(SessionManager sessionManager, String uri) {
-		return new String(getBinaryPageContent(sessionManager, uri));
+		byte[] bytes = getBinaryPageContent(sessionManager, uri);
+		return bytes != null ? new String(bytes) : null;
 	}
 
 	public static byte[] getBinaryPageContent(SessionManager sessionManager, String host, String urlOrPath) {
 		boolean isRelativeLink = urlOrPath.startsWith("/");
-
 		return getBinaryPageContent(sessionManager, isRelativeLink ? host + urlOrPath : urlOrPath);
 	}
 
@@ -39,15 +43,21 @@ public class HttpUtils {
 		byte[] pageContent = null;
 		try {
 			LogMe.d("Loading page " + uri);
-			HttpGet page = new HttpGet(uri);
 
-			DefaultHttpClient httpClient = new DefaultHttpClient();
-			setAuthCookie(sessionManager, httpClient);
+			Request.Builder requestBuilder = new Request.Builder().url(uri);
+			addAuthCookie(sessionManager, requestBuilder);
 
-			HttpResponse response = httpClient.execute(page);
-			pageContent = IOUtils.toByteArray(response.getEntity().getContent());
-			LogMe.d("Loaded (" + pageContent.length + ") " + uri);
-			// LogMe.d(new String(pageContent));
+			Response response = client.newCall(requestBuilder.build()).execute();
+			if (!response.isSuccessful()) {
+				LogMe.e("HTTP " + response.code() + " for " + uri);
+				response.close();
+			} else {
+				ResponseBody body = response.body();
+				if (body != null) {
+					pageContent = body.bytes();
+				}
+				LogMe.d("Loaded (" + (pageContent != null ? pageContent.length : 0) + ") " + uri);
+			}
 		} catch (OutOfMemoryError oome) {
 			System.gc();
 			LogMe.e("OOM. Cleaned garbage");
@@ -61,11 +71,11 @@ public class HttpUtils {
 		return pageContent;
 	}
 
-	private static void setAuthCookie(SessionManager sessionManager, DefaultHttpClient httpClient) {
+	private static void addAuthCookie(SessionManager sessionManager, Request.Builder requestBuilder) {
 		if (sessionManager != null) {
-			Cookie authenticationCookie = sessionManager.getAuthenticationCookie();
-			if (authenticationCookie != null) {
-				httpClient.getCookieStore().addCookie(authenticationCookie);
+			String cookieValue = sessionManager.getAuthenticationCookieValue();
+			if (cookieValue != null) {
+				requestBuilder.addHeader("Cookie", "reddit_session=" + cookieValue);
 			}
 		}
 	}
@@ -97,27 +107,25 @@ public class HttpUtils {
 
 	public static String doPost(SessionManager sessionManager, String baseUrl, String path,
 			Map<String, String> parameterMap) {
-		DefaultHttpClient httpClient = new DefaultHttpClient();
-		setAuthCookie(sessionManager, httpClient);
-
-		HttpPost httpPost = new HttpPost(baseUrl + "/" + path);
-
 		String responseContent = null;
 		try {
 			LogMe.e("Doing POST to " + baseUrl);
 
-			List<NameValuePair> postParameters = new ArrayList<NameValuePair>();
-			for (String key : parameterMap.keySet()) {
-				postParameters.add(new BasicNameValuePair(key, parameterMap.get(key)));
+			FormBody.Builder formBuilder = new FormBody.Builder();
+			for (Map.Entry<String, String> entry : parameterMap.entrySet()) {
+				formBuilder.add(entry.getKey(), entry.getValue());
 			}
-			httpPost.setEntity(new UrlEncodedFormEntity(postParameters, HTTP.UTF_8));
 
-			HttpParams params = httpPost.getParams();
-			HttpConnectionParams.setConnectionTimeout(params, CONNECTION_TIMEOUT);
-			HttpConnectionParams.setSoTimeout(params, DOWNLOAD_TIMEOUT);
+			Request.Builder requestBuilder = new Request.Builder()
+					.url(baseUrl + "/" + path)
+					.post(formBuilder.build());
+			addAuthCookie(sessionManager, requestBuilder);
 
-			HttpResponse response = httpClient.execute(httpPost);
-			responseContent = IOUtils.toString(response.getEntity().getContent());
+			Response response = client.newCall(requestBuilder.build()).execute();
+			ResponseBody body = response.body();
+			if (body != null) {
+				responseContent = body.string();
+			}
 
 			LogMe.e("Response: " + responseContent);
 		} catch (Exception e) {

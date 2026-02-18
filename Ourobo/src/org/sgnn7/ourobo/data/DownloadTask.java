@@ -3,31 +3,54 @@ package org.sgnn7.ourobo.data;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.sgnn7.ourobo.authentication.SessionManager;
 import org.sgnn7.ourobo.eventing.IChangeEventListener;
 import org.sgnn7.ourobo.util.HttpUtils;
 import org.sgnn7.ourobo.util.JsonUtils;
 import org.sgnn7.ourobo.util.LogMe;
 
-import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 
-public abstract class DownloadTask extends AsyncTask<String, Void, List<RedditPost>> {
+public abstract class DownloadTask {
+	private static final ExecutorService executor = Executors.newCachedThreadPool();
+	private static final Handler mainHandler = new Handler(Looper.getMainLooper());
+
 	private final SessionManager sessionManager;
 
 	private IChangeEventListener taskDoneListener;
 	private String uri;
-	private boolean isTaskDone = false;
+	private volatile boolean isTaskDone = false;
+	private final AtomicBoolean isCancelled = new AtomicBoolean(false);
 
 	public DownloadTask(SessionManager sessionManager) {
 		this.sessionManager = sessionManager;
 	}
 
-	@Override
+	public void execute(String... params) {
+		executor.execute(new Runnable() {
+			@Override
+			public void run() {
+				final List<RedditPost> posts = doInBackground(params);
+				if (!isCancelled.get()) {
+					mainHandler.post(new Runnable() {
+						@Override
+						public void run() {
+							onPostExecute(posts);
+						}
+					});
+				}
+			}
+		});
+	}
+
 	protected List<RedditPost> doInBackground(String... params) {
 		List<RedditPost> posts = new ArrayList<RedditPost>();
 		try {
@@ -45,8 +68,7 @@ public abstract class DownloadTask extends AsyncTask<String, Void, List<RedditPo
 		return posts;
 	}
 
-	private List<RedditPost> getRedditPostsFromContent(String pageContent) throws IOException, JsonParseException,
-			JsonMappingException {
+	private List<RedditPost> getRedditPostsFromContent(String pageContent) throws IOException {
 		if (pageContent == null) {
 			throw new IOException("Json was empty. Will not try to deserialize");
 		}
@@ -66,10 +88,17 @@ public abstract class DownloadTask extends AsyncTask<String, Void, List<RedditPo
 		return isTaskDone;
 	}
 
+	public void cancel(boolean mayInterruptIfRunning) {
+		isCancelled.set(true);
+		LogMe.w("Task canceled - " + uri);
+	}
+
+	public boolean isCancelled() {
+		return isCancelled.get();
+	}
+
 	protected abstract void onDownloadComplete(List<RedditPost> results);
 
-	@Override
-	@Deprecated
 	protected void onPostExecute(List<RedditPost> result) {
 		onDownloadComplete(result);
 
@@ -78,11 +107,5 @@ public abstract class DownloadTask extends AsyncTask<String, Void, List<RedditPo
 			taskDoneListener.handle();
 			LogMe.w("Task done - " + uri);
 		}
-	}
-
-	@Override
-	protected void onCancelled() {
-		LogMe.w("Task canceled - " + uri);
-		onPostExecute(new ArrayList<RedditPost>());
 	}
 }

@@ -1,16 +1,12 @@
 package org.sgnn7.ourobo.util;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.map.DeserializationContext;
-import org.codehaus.jackson.map.DeserializationProblemHandler;
-import org.codehaus.jackson.map.JsonDeserializer;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.sgnn7.ourobo.data.RedditPost;
 
 public class JsonUtils {
@@ -18,7 +14,7 @@ public class JsonUtils {
 
 	static {
 		objectMapper = new ObjectMapper();
-		objectMapper.getDeserializationConfig().addHandler(new IgnoreUnusedFieldsHandler());
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 
 	public static List<RedditPost> convertJsonPostsToObjects(List<JsonNode> posts) {
@@ -42,7 +38,7 @@ public class JsonUtils {
 	public static <T> T convertJsonToBean(JsonNode json, Class<T> clazz) {
 		T returnObject = null;
 		try {
-			Object obj = objectMapper.readValue(json, clazz);
+			Object obj = objectMapper.readValue(json.traverse(), clazz);
 			returnObject = clazz.cast(obj);
 		} catch (Exception e) {
 			LogMe.e("Could not deserialize data " + e.getMessage());
@@ -56,7 +52,7 @@ public class JsonUtils {
 		List<JsonNode> children = new ArrayList<JsonNode>();
 		JsonNode targetNode = traverseJsonTree(topNode, fullPath);
 
-		Iterator<JsonNode> elements = targetNode.getElements();
+		Iterator<JsonNode> elements = targetNode.elements();
 		while (elements.hasNext()) {
 			children.add(elements.next());
 		}
@@ -71,15 +67,5 @@ public class JsonUtils {
 			targetNode = targetNode.get(pathPart);
 		}
 		return targetNode;
-	}
-
-	private static class IgnoreUnusedFieldsHandler extends DeserializationProblemHandler {
-		@Override
-		public boolean handleUnknownProperty(DeserializationContext ctxt, JsonDeserializer<?> deserializer,
-				Object beanOrClass, String propertyName) throws IOException, JsonProcessingException {
-			ctxt.getParser().skipChildren();
-			LogMe.v("Unknown property " + propertyName + " skipped");
-			return true;
-		}
 	}
 }

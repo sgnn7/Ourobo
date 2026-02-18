@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal" >
 
     <RelativeLayout
         android:id="@+id/voting_buttons"
         android:layout_width="32dip"
-        android:layout_height="fill_parent" >
+        android:layout_height="match_parent" >
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -18,7 +18,7 @@
 
             <RelativeLayout
                 android:id="@+id/upvote"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="0px"
                 android:layout_weight="1" >
 
@@ -28,25 +28,26 @@
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:background="@android:color/transparent"
+                    android:contentDescription="@string/upvote_description"
                     android:scaleType="fitCenter"
                     android:src="@drawable/upvote" />
             </RelativeLayout>
 
             <RelativeLayout
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="3px"
                 android:background="@android:color/transparent" >
 
                 <View
                     android:layout_width="3px"
-                    android:layout_height="fill_parent"
+                    android:layout_height="match_parent"
                     android:layout_centerHorizontal="true"
                     android:background="@color/semi_transparent_border" />
             </RelativeLayout>
 
             <RelativeLayout
                 android:id="@+id/downvote"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="0px"
                 android:layout_weight="1" >
 
@@ -56,6 +57,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:background="@android:color/transparent"
+                    android:contentDescription="@string/downvote_description"
                     android:scaleType="fitCenter"
                     android:src="@drawable/downvote" />
             </RelativeLayout>
@@ -64,7 +66,7 @@
 
     <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="fill_parent" >
+        android:layout_height="match_parent" >
 
         <ViewSwitcher
             android:id="@+id/post_thumbnail_holder"
@@ -77,8 +79,8 @@
             android:paddingTop="5dip" >
 
             <RelativeLayout
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent" >
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
 
                 <ProgressBar
                     style="@android:style/Widget.ProgressBar.Large.Inverse"
@@ -89,16 +91,17 @@
 
             <ImageView
                 android:id="@+id/post_thumbnail"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:background="@android:color/transparent"
+                android:contentDescription="@string/thumbnail_description"
                 android:scaleType="fitCenter" />
         </ViewSwitcher>
     </RelativeLayout>
 
     <TextView
         android:id="@+id/post_title"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="10"
         android:background="@android:color/transparent"
@@ -113,7 +116,7 @@
     <RelativeLayout
         android:id="@+id/post_score_holder"
         android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
+        android:layout_height="match_parent"
         android:layout_marginRight="8dip" >
 
         <TextView
