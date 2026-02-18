@@ -39,14 +39,19 @@ public abstract class DownloadTask {
 			@Override
 			public void run() {
 				final List<RedditPost> posts = doInBackground(params);
-				if (!isCancelled.get()) {
-					mainHandler.post(new Runnable() {
-						@Override
-						public void run() {
+				mainHandler.post(new Runnable() {
+					@Override
+					public void run() {
+						if (!isCancelled.get()) {
 							onPostExecute(posts);
+						} else {
+							isTaskDone = true;
+							if (taskDoneListener != null) {
+								taskDoneListener.handle();
+							}
 						}
-					});
-				}
+					}
+				});
 			}
 		});
 	}

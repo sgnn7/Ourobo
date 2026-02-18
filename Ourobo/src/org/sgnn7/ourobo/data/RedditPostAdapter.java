@@ -52,12 +52,14 @@ public class RedditPostAdapter extends BaseAdapter {
 	private final Drawable upvotedImage;
 	private final Drawable downvotedImage;
 
+	private final IChangeEventListener finishedDownloadingListener;
 	private DownloadTask currentDownloadTask = null;
 
 	public RedditPostAdapter(Activity activity, SessionManager sessionManager, String baseUrl, String dataLocationUri,
 			String mobileBaseUrl, IChangeEventListener finishedDownloadingListener) {
 		this.activity = activity;
 		resources = activity.getResources();
+		this.finishedDownloadingListener = finishedDownloadingListener;
 		this.downloadTaskFactory = createDownloadTaskFactory(finishedDownloadingListener);
 		this.baseUrl = baseUrl;
 		this.dataLocationUrl = dataLocationUri;
@@ -173,6 +175,7 @@ public class RedditPostAdapter extends BaseAdapter {
 		if (currentDownloadTask != null && !currentDownloadTask.isCancelled()) {
 			currentDownloadTask.cancel(true);
 			currentDownloadTask = null;
+			finishedDownloadingListener.handle();
 		}
 	}
 

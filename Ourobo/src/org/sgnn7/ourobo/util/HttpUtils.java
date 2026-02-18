@@ -47,16 +47,16 @@ public class HttpUtils {
 			Request.Builder requestBuilder = new Request.Builder().url(uri);
 			addAuthCookie(sessionManager, requestBuilder);
 
-			Response response = client.newCall(requestBuilder.build()).execute();
-			if (!response.isSuccessful()) {
-				LogMe.e("HTTP " + response.code() + " for " + uri);
-				response.close();
-			} else {
-				ResponseBody body = response.body();
-				if (body != null) {
-					pageContent = body.bytes();
+			try (Response response = client.newCall(requestBuilder.build()).execute()) {
+				if (!response.isSuccessful()) {
+					LogMe.e("HTTP " + response.code() + " for " + uri);
+				} else {
+					ResponseBody body = response.body();
+					if (body != null) {
+						pageContent = body.bytes();
+					}
+					LogMe.d("Loaded (" + (pageContent != null ? pageContent.length : 0) + ") " + uri);
 				}
-				LogMe.d("Loaded (" + (pageContent != null ? pageContent.length : 0) + ") " + uri);
 			}
 		} catch (OutOfMemoryError oome) {
 			System.gc();
@@ -121,10 +121,11 @@ public class HttpUtils {
 					.post(formBuilder.build());
 			addAuthCookie(sessionManager, requestBuilder);
 
-			Response response = client.newCall(requestBuilder.build()).execute();
-			ResponseBody body = response.body();
-			if (body != null) {
-				responseContent = body.string();
+			try (Response response = client.newCall(requestBuilder.build()).execute()) {
+				ResponseBody body = response.body();
+				if (body != null) {
+					responseContent = body.string();
+				}
 			}
 
 			LogMe.e("Response: " + responseContent);
