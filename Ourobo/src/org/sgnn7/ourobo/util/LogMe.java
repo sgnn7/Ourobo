@@ -5,7 +5,7 @@ import org.sgnn7.ourobo.BuildConfig;
 import android.util.Log;
 
 public class LogMe {
-	private static enum LogLevels {
+	private enum LogLevels {
 		ERROR, WARN, INFO, DEBUG, VERBOSE
 	}
 

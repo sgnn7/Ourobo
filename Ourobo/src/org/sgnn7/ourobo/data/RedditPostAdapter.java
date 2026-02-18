@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.sgnn7.ourobo.BrowserActivity;
 import org.sgnn7.ourobo.R;
 import org.sgnn7.ourobo.authentication.SessionManager;
@@ -15,6 +15,8 @@ import org.sgnn7.ourobo.eventing.IChangeEventListener;
 import org.sgnn7.ourobo.util.HttpUtils;
 import org.sgnn7.ourobo.util.ImageCacheManager;
 import org.sgnn7.ourobo.util.LogMe;
+
+import androidx.core.content.ContextCompat;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -50,20 +52,22 @@ public class RedditPostAdapter extends BaseAdapter {
 	private final Drawable upvotedImage;
 	private final Drawable downvotedImage;
 
+	private final IChangeEventListener finishedDownloadingListener;
 	private DownloadTask currentDownloadTask = null;
 
 	public RedditPostAdapter(Activity activity, SessionManager sessionManager, String baseUrl, String dataLocationUri,
 			String mobileBaseUrl, IChangeEventListener finishedDownloadingListener) {
 		this.activity = activity;
 		resources = activity.getResources();
+		this.finishedDownloadingListener = finishedDownloadingListener;
 		this.downloadTaskFactory = createDownloadTaskFactory(finishedDownloadingListener);
 		this.baseUrl = baseUrl;
 		this.dataLocationUrl = dataLocationUri;
 		this.mobileBaseUrl = mobileBaseUrl;
 		this.sessionManager = sessionManager;
 
-		this.upvotedImage = activity.getResources().getDrawable(R.drawable.upvoted);
-		this.downvotedImage = activity.getResources().getDrawable(R.drawable.downvoted);
+		this.upvotedImage = ContextCompat.getDrawable(activity, R.drawable.upvoted);
+		this.downvotedImage = ContextCompat.getDrawable(activity, R.drawable.downvoted);
 	}
 
 	private DownloadTaskFactory createDownloadTaskFactory(final IChangeEventListener finishedDownloadingListener) {
@@ -171,6 +175,7 @@ public class RedditPostAdapter extends BaseAdapter {
 		if (currentDownloadTask != null && !currentDownloadTask.isCancelled()) {
 			currentDownloadTask.cancel(true);
 			currentDownloadTask = null;
+			finishedDownloadingListener.handle();
 		}
 	}
 
@@ -184,8 +189,8 @@ public class RedditPostAdapter extends BaseAdapter {
 
 		final UrlFileType fileType = HttpUtils.getFileType(redditPost.getUrl());
 
-		postHolder.setBackgroundDrawable(resources.getDrawable(index % 2 == 0 ? R.drawable.gray_post_style
-				: R.drawable.blue_post_style));
+		postHolder.setBackground(ContextCompat.getDrawable(activity,
+				index % 2 == 0 ? R.drawable.gray_post_style : R.drawable.blue_post_style));
 		postHolder.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				stopAllDownloads();
@@ -291,6 +296,7 @@ public class RedditPostAdapter extends BaseAdapter {
 		Map<String, String> parameters = new HashMap<String, String>();
 		parameters.put("limit", "" + DEFAULT_POST_COUNT);
 		parameters.put("sort", DEFAULT_SORTING_TYPE);
+		parameters.put("raw_json", "1");
 
 		if (getCount() != 0) {
 			parameters.put("after", getLastPostId());

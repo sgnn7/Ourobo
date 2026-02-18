@@ -3,7 +3,7 @@ package org.sgnn7.ourobo;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 
 public class PreferencesManager {
 	private final Resources resources;

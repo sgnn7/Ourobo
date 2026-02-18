@@ -5,10 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.cookie.BasicClientCookie;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.sgnn7.ourobo.PreferencesManager;
 import org.sgnn7.ourobo.R;
 import org.sgnn7.ourobo.data.AuthenticationResponse;
@@ -35,7 +33,7 @@ public class SessionManager {
 	public boolean authenticateUser() {
 		boolean isLoggedIn = false;
 
-		if (getAuthenticationCookie() == null) {
+		if (getAuthenticationCookieValue() == null) {
 			String username = preferencesManager.getString(R.string.preference_id_username);
 			String password = preferencesManager.getString(R.string.preference_id_password);
 
@@ -49,7 +47,7 @@ public class SessionManager {
 
 					// only for debug
 					LogMe.e("Checking authentication cookie");
-					String pageContent = HttpUtils.getPageContent(this, "http://www.reddit.com/api/me.json");
+					String pageContent = HttpUtils.getPageContent(this, "https://www.reddit.com/api/me.json");
 					LogMe.e("Got response: " + pageContent);
 				} else {
 					displayErrors(response.getErrorMessages());
@@ -137,18 +135,12 @@ public class SessionManager {
 		Toast.makeText(context, message, duration).show();
 	}
 
-	public Cookie getAuthenticationCookie() {
-		BasicClientCookie authCookie = null;
-
+	public String getAuthenticationCookieValue() {
 		if (cookieData != null) {
-			authCookie = new BasicClientCookie("reddit_session", cookieData);
-			authCookie.setDomain(".reddit.com");
-			authCookie.setPath("/");
-			LogMe.e("Using auth cookie: " + authCookie.toString());
+			LogMe.e("Using auth cookie value");
 		} else {
 			LogMe.e("Not using auth cookie");
 		}
-
-		return authCookie;
+		return cookieData;
 	}
 }
