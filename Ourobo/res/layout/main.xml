@@ -75,4 +75,18 @@
             android:dividerHeight="0dip" />
     </LinearLayout>
 
+    <ImageButton
+        android:id="@+id/fab_menu"
+        android:layout_width="56dip"
+        android:layout_height="56dip"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="16dip"
+        android:layout_marginRight="16dip"
+        android:background="@drawable/fab_background"
+        android:contentDescription="@string/menu_button_description"
+        android:elevation="4dip"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_hamburger" />
+
 </RelativeLayout>

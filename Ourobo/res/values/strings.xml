@@ -18,6 +18,8 @@
     <string name="bad_username">Bad username. No bacon for you</string>
     <string name="bad_password">Bad password. Epic fail on your part</string>
 
+    <string name="menu_button_description">Menu</string>
+
     <string name="upvote_description">Upvote</string>
     <string name="downvote_description">Downvote</string>
     <string name="thumbnail_description">Post thumbnail</string>
