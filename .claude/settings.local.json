@@ -5,7 +5,10 @@
       "Bash(./gradlew :app:assembleDebug:*)",
       "Bash(./gradlew clean:*)",
       "Bash(find:*)",
-      "Bash(./gradlew assembleDebug:*)"
+      "Bash(./gradlew assembleDebug:*)",
+      "Bash(git stash:*)",
+      "Bash(./gradlew test:*)",
+      "Bash(./gradlew assembleDebugAndroidTest:*)"
     ]
   }
 }
