@@ -3,7 +3,9 @@
     "allow": [
       "Bash(export JAVA_HOME=/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home)",
       "Bash(./gradlew :app:assembleDebug:*)",
-      "Bash(./gradlew clean:*)"
+      "Bash(./gradlew clean:*)",
+      "Bash(find:*)",
+      "Bash(./gradlew assembleDebug:*)"
     ]
   }
 }

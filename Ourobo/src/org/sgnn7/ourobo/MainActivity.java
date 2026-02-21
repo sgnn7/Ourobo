@@ -21,7 +21,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 
@@ -92,6 +94,20 @@ public class MainActivity extends AppCompatActivity {
 				refreshPosts();
 			}
 		});
+
+		ImageButton fabMenu = (ImageButton) findViewById(R.id.fab_menu);
+		fabMenu.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				PopupMenu popup = new PopupMenu(MainActivity.this, v);
+				popup.getMenuInflater().inflate(R.menu.main_menu, popup.getMenu());
+				popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+					public boolean onMenuItemClick(MenuItem item) {
+						return handleMenuItemSelected(item.getItemId());
+					}
+				});
+				popup.show();
+			}
+		});
 	}
 
 	private void attachListAdapterToListView(SessionManager sessionManager, String newSubreddit) {
@@ -151,7 +167,13 @@ public class MainActivity extends AppCompatActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		int id = item.getItemId();
+		if (handleMenuItemSelected(item.getItemId())) {
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	private boolean handleMenuItemSelected(int id) {
 		if (id == R.id.menu_refresh) {
 			refreshPosts();
 
@@ -166,9 +188,8 @@ public class MainActivity extends AppCompatActivity {
 		} else if (id == R.id.menu_preferences) {
 			startActivity(new Intent(this, AppPreferenceActivity.class));
 			return true;
-		} else {
-			return super.onOptionsItemSelected(item);
 		}
+		return false;
 	}
 
 	private void refreshPosts() {
