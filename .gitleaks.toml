@@ -1,0 +1,15 @@
+title = "Ourobo Gitleaks Configuration"
+
+[allowlist]
+  description = "Allowlist for known false positives in this Android Reddit client"
+
+  paths = [
+    '''OuroboTestService/src/resources/json/.*\.json''',
+    '''\.claude/.*''',
+  ]
+
+  regexTarget = "line"
+  regexes = [
+    '''reddit_session=.*\+.*cookieValue''',
+    '''preference_id_(username|password)''',
+  ]
