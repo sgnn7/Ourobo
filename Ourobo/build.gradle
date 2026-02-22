@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "org.sgnn7.ourobo"
-        minSdk 21
+        minSdk 23
         targetSdk 35
         versionCode 13
         versionName "0.13"
@@ -69,6 +69,7 @@ dependencies {
     implementation 'androidx.core:core:1.15.0'
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.preference:preference:1.2.1'
+    implementation 'androidx.security:security-crypto:1.0.0'
 
     testImplementation 'junit:junit:4.13.2'
 
