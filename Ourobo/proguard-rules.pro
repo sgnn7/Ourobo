@@ -19,6 +19,9 @@
 -keep class org.sgnn7.ourobo.data.RedditPost { *; }
 -keep class org.sgnn7.ourobo.data.AuthenticationResponse { *; }
 
+# AndroidX Security / Tink
+-dontwarn com.google.errorprone.annotations.Immutable
+
 # OkHttp
 -dontwarn okhttp3.**
 -dontwarn okio.**

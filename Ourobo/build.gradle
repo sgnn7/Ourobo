@@ -10,8 +10,8 @@ android {
         applicationId "org.sgnn7.ourobo"
         minSdk 23
         targetSdk 35
-        versionCode 13
-        versionName "0.13"
+        versionCode 14
+        versionName "0.14.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -55,6 +55,14 @@ android {
 
     lint {
         abortOnError = false
+    }
+}
+
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        variant.outputs.forEach { output ->
+            output.outputFileName.set("ourobo_${variant.buildType}_${variant.outputs[0].versionName.get()}.apk")
+        }
     }
 }
 
