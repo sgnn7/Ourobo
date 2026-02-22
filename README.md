@@ -11,6 +11,12 @@ A lightweight Reddit client for Android.
 - Add custom subreddits via long-press on the subreddit selector
 - Reddit account login with encrypted credential storage (AES-256 via Android Keystore)
 
+## Screenshots
+
+| Post list | Landscape | Menu | Subreddit selector | Custom subreddit |
+|---|---|---|---|---|
+| ![Post list](docs/images/screenshot_1.png) | ![Landscape](docs/images/screenshot_2.png) | ![Menu](docs/images/screenshot_3.png) | ![Subreddit selector](docs/images/screenshot_4.png) | ![Custom subreddit](docs/images/screenshot_5.png) |
+
 ## Requirements
 
 - Android 6.0+ (API 23)
