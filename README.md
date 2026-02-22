@@ -1,8 +1,54 @@
-**Outdated!**
+# Ourobo
 
-**Reddit's mobile interface now does everything this project was intending to do when I wrote it (and it has almost exactly the same UI - I wonder if they used it as a reference) so the purpose of this app is gone and the API I was using has become highly unstable. Feel free to use the code any way you want but most likely this will be the last of the updates for this.**
+A lightweight Reddit client for Android.
 
-Ourobo
-======
+## Features
 
-Reddit Android 4.1+ client. Does basic functionality with possible plans to make it a full fledged client
+- Browse subreddits and switch between them
+- View post thumbnails, titles, and scores
+- Upvote and downvote posts
+- Open posts and comments in a built-in WebView browser
+- Add custom subreddits via long-press on the subreddit selector
+- Reddit account login with encrypted credential storage (AES-256 via Android Keystore)
+
+## Requirements
+
+- Android 6.0+ (API 23)
+- Internet permission
+
+## Building
+
+Requires Java 11 and the Android SDK (compileSdk 35).
+
+```sh
+# Debug build
+./gradlew assembleDebug
+
+# Release build
+./gradlew assembleRelease
+
+# Install debug build on connected device
+./gradlew installDebug
+
+# Run tests
+./gradlew test
+```
+
+APKs are output to `Ourobo/build/outputs/apk/` with the naming convention `ourobo_<variant>_<version>.apk`.
+
+## Project Structure
+
+```
+Ourobo/
+  src/                  # Application source (Java)
+  res/                  # Android resources (layouts, drawables, values)
+  test/src/             # Unit tests
+  AndroidManifest.xml
+  build.gradle
+OuroboTest/
+  src/                  # Instrumentation tests
+```
+
+## License
+
+MIT - See [LICENSE.md](LICENSE.md) for details.
