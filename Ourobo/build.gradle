@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "org.sgnn7.ourobo"
-        minSdk 21
+        minSdk 23
         targetSdk 35
         versionCode 13
         versionName "0.13"

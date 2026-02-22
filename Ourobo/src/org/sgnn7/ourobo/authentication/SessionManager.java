@@ -15,12 +15,15 @@ import org.sgnn7.ourobo.util.JsonUtils;
 import org.sgnn7.ourobo.util.LogMe;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.Toast;
 
 public class SessionManager {
 	private final PreferencesManager preferencesManager;
 	private final Context context;
 	private final String baseUrl;
+	private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
 	private String cookieData = null;
 
@@ -85,6 +88,10 @@ public class SessionManager {
 				e.printStackTrace();
 			}
 
+			if (topNode == null) {
+				return authenticationResponse;
+			}
+
 			List<JsonNode> errorJsonNodes = JsonUtils.getJsonChildren(topNode, "json/errors");
 			if (!errorJsonNodes.isEmpty()) {
 				for (JsonNode jsonNode : errorJsonNodes) {
@@ -92,8 +99,11 @@ public class SessionManager {
 					authenticationResponse.getErrorMessages().add(readableErrorText);
 				}
 			} else {
-				authenticationResponse = JsonUtils
+				AuthenticationResponse parsed = JsonUtils
 						.convertJsonToBean(topNode, "json/data", AuthenticationResponse.class);
+				if (parsed != null) {
+					authenticationResponse = parsed;
+				}
 			}
 		}
 
@@ -131,8 +141,16 @@ public class SessionManager {
 		showMessage(context.getResources().getString(messageId), duration);
 	}
 
-	private void showMessage(String message, int duration) {
-		Toast.makeText(context, message, duration).show();
+	private void showMessage(final String message, final int duration) {
+		if (Looper.myLooper() == Looper.getMainLooper()) {
+			Toast.makeText(context, message, duration).show();
+		} else {
+			mainHandler.post(new Runnable() {
+				public void run() {
+					Toast.makeText(context, message, duration).show();
+				}
+			});
+		}
 	}
 
 	public String getAuthenticationCookieValue() {

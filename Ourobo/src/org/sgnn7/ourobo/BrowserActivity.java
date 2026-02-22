@@ -107,7 +107,7 @@ public class BrowserActivity extends AppCompatActivity {
 
 	private void loadIntentUrl() {
 		webView.clearHistory();
-		webView.setBackgroundColor(Color.BLACK);
+		webView.setBackgroundColor(Color.WHITE);
 
 		webView.loadUrl(getIntent().getStringExtra(URL_PARAMETER_KEY));
 	}

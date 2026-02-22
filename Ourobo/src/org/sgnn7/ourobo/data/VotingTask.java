@@ -25,17 +25,23 @@ public class VotingTask {
 	private final SessionManager sessionManager;
 	private final Context context;
 	private final boolean isUpvote;
+	private final VoteResultListener listener;
+
+	public interface VoteResultListener {
+		void onVoteSuccess(boolean isUpvote);
+	}
 
 	public VotingTask(Context context, SessionManager sessionManager, String baseUrl, RedditPost redditPost,
-			boolean isUpvote) {
+			boolean isUpvote, VoteResultListener listener) {
 		this.context = context;
 		this.sessionManager = sessionManager;
 		this.baseUrl = baseUrl;
 		this.redditPost = redditPost;
 		this.isUpvote = isUpvote;
+		this.listener = listener;
 	}
 
-	public void execute(String... url) {
+	public void execute() {
 		executor.execute(new Runnable() {
 			@Override
 			public void run() {
@@ -51,24 +57,32 @@ public class VotingTask {
 	}
 
 	private boolean doInBackground() {
-		boolean votingSuccess = false;
+		try {
+			boolean isAuthenticated = sessionManager.authenticateUser();
+			if (!isAuthenticated) {
+				return false;
+			}
 
-		Map<String, String> parameterMap = new HashMap<String, String>();
-		parameterMap.put("id", redditPost.getName());
-		parameterMap.put("dir", isUpvote ? "1" : "-1");
+			Map<String, String> parameterMap = new HashMap<String, String>();
+			parameterMap.put("id", redditPost.getName());
+			parameterMap.put("dir", isUpvote ? "1" : "-1");
 
-		String votingResult = HttpUtils.doPost(sessionManager, baseUrl, "api/login/", parameterMap);
-		LogMe.e("Voting result: " + votingResult);
+			String votingResult = HttpUtils.doPost(sessionManager, baseUrl, "api/vote/", parameterMap);
+			LogMe.e("Voting result: " + votingResult);
 
-		if (StringUtils.equals(GOOD_RESPONSE, votingResult)) {
-			votingSuccess = true;
+			return StringUtils.equals(GOOD_RESPONSE, votingResult);
+		} catch (Exception e) {
+			LogMe.e("Voting failed: " + e.getMessage());
+			return false;
 		}
-
-		return votingSuccess;
 	}
 
 	private void onPostExecute(boolean votingSuccessful) {
-		if (!votingSuccessful) {
+		if (votingSuccessful) {
+			if (listener != null) {
+				listener.onVoteSuccess(isUpvote);
+			}
+		} else {
 			Toast.makeText(context, "Voting failed", Toast.LENGTH_SHORT).show();
 		}
 	}
