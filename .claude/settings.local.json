@@ -9,7 +9,13 @@
       "Bash(git stash:*)",
       "Bash(./gradlew test:*)",
       "Bash(./gradlew assembleDebugAndroidTest:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(./gradlew installDebug:*)",
+      "Bash(/Users/sg/Library/Android/sdk/platform-tools/adb shell am start -n org.sgnn7.ourobo/.MainActivity)",
+      "Bash(git status)",
+      "Bash(git diff)",
+      "Bash(git log --oneline -5)",
+      "Bash(git add:*)"
     ]
   }
 }

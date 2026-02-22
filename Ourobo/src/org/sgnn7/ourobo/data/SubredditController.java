@@ -63,7 +63,9 @@ public class SubredditController {
 					if (subredditUrl.startsWith(SUBREDDIT_PREFIX)) {
 						subredditUrl = subredditUrl.substring(3);
 					}
-					subredditList.add(subredditUrl);
+					if (!subredditUrl.equalsIgnoreCase(DEFAULT_SUBREDDIT)) {
+						subredditList.add(subredditUrl);
+					}
 				}
 
 				progressBar.setVisibility(View.INVISIBLE);

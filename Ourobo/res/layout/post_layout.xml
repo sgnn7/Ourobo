@@ -33,17 +33,17 @@
                     android:src="@drawable/upvote" />
             </RelativeLayout>
 
-            <RelativeLayout
+            <TextView
+                android:id="@+id/post_score"
                 android:layout_width="match_parent"
-                android:layout_height="3px"
-                android:background="@android:color/transparent" >
-
-                <View
-                    android:layout_width="3px"
-                    android:layout_height="match_parent"
-                    android:layout_centerHorizontal="true"
-                    android:background="@color/semi_transparent_border" />
-            </RelativeLayout>
+                android:layout_height="wrap_content"
+                android:background="@drawable/score_style"
+                android:gravity="center"
+                android:hint="..."
+                android:maxLines="1"
+                android:minLines="1"
+                android:textColor="@color/score_color"
+                android:textSize="9sp" />
 
             <RelativeLayout
                 android:id="@+id/downvote"
@@ -114,13 +114,13 @@
         android:textStyle="bold" />
 
     <RelativeLayout
-        android:id="@+id/post_score_holder"
+        android:id="@+id/post_comment_count_holder"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_marginRight="8dip" >
 
         <TextView
-            android:id="@+id/post_score"
+            android:id="@+id/post_comment_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -129,10 +129,8 @@
             android:hint="..."
             android:maxLines="1"
             android:minLines="1"
-            android:paddingBottom="0dip"
             android:paddingLeft="10dip"
             android:paddingRight="10dip"
-            android:paddingTop="0dip"
             android:textColor="@color/score_color" />
     </RelativeLayout>
 

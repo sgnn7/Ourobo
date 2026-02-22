@@ -224,22 +224,11 @@ public class RedditPostAdapter extends BaseAdapter {
 		thumbnailLazyLoader.loadImage(activity, redditPost.getThumbnail());
 		// }
 
-		RelativeLayout scoreHolder = (RelativeLayout) postHolder.findViewById(R.id.post_score_holder);
-		scoreHolder.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				stopAllDownloads();
+		TextView scoreView = (TextView) postHolder.findViewById(R.id.post_score);
+		scoreView.setText(formatScore(redditPost.getScore()));
 
-				String commentsUrl = mobileBaseUrl + redditPost.getPermalink();
-				LogMe.e("Opening comments at: " + commentsUrl);
-
-				Intent targetIntent = new Intent(activity, BrowserActivity.class);
-				targetIntent.putExtra(BrowserActivity.URL_PARAMETER_KEY, commentsUrl);
-				activity.startActivity(targetIntent);
-			}
-		});
-
-		TextView scoreView = (TextView) scoreHolder.findViewById(R.id.post_score);
-		scoreView.setText("" + redditPost.getScore());
+		TextView commentCountView = (TextView) postHolder.findViewById(R.id.post_comment_count);
+		commentCountView.setText(formatScore(redditPost.getNum_comments()));
 	}
 
 	private void configureVotingButtons(final View postHolder, final RedditPost redditPost) {
@@ -275,7 +264,7 @@ public class RedditPostAdapter extends BaseAdapter {
 					downvoteIcon.setImageDrawable(downvotedImage);
 					upvoteIcon.setImageResource(R.drawable.upvote);
 				}
-				scoreView.setText("" + redditPost.getScore());
+				scoreView.setText(formatScore(redditPost.getScore()));
 			}
 		};
 
@@ -297,6 +286,17 @@ public class RedditPostAdapter extends BaseAdapter {
 	private void voteOnStory(RedditPost redditPost, boolean isUpvote, VotingTask.VoteResultListener listener) {
 		LogMe.e("Voting (" + isUpvote + ")...");
 		new VotingTask(activity, sessionManager, baseUrl, redditPost, isUpvote, listener).execute();
+	}
+
+	private static String formatScore(int score) {
+		int abs = Math.abs(score);
+		String sign = score < 0 ? "-" : "";
+		if (abs >= 1_000_000) {
+			return sign + (abs / 1_000_000) + "m";
+		} else if (abs >= 1_000) {
+			return sign + (abs / 1_000) + "k";
+		}
+		return String.valueOf(score);
 	}
 
 	private String sanitizeString(String text) {
