@@ -14,11 +14,10 @@
             
         <EditTextPreference
             android:key="@string/preference_id_password"
-            android:title="Password" 
+            android:title="Password"
             android:summary="Your reddit password"
             android:dialogTitle="Password"
-            android:password="true" 
-            android:dialogMessage="Edit your password"    
+            android:dialogMessage="Edit your password"
             android:defaultValue="" />            
     </PreferenceCategory>
 </PreferenceScreen>
