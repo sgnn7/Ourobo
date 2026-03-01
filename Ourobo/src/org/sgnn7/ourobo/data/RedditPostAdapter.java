@@ -227,6 +227,20 @@ public class RedditPostAdapter extends BaseAdapter {
 		TextView scoreView = (TextView) postHolder.findViewById(R.id.post_score);
 		scoreView.setText(formatScore(redditPost.getScore()));
 
+		View commentCountHolder = postHolder.findViewById(R.id.post_comment_count_holder);
+		commentCountHolder.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				stopAllDownloads();
+
+				String commentsUrl = mobileBaseUrl + redditPost.getPermalink();
+				LogMe.e("Opening comments at: " + commentsUrl);
+
+				Intent targetIntent = new Intent(activity, BrowserActivity.class);
+				targetIntent.putExtra(BrowserActivity.URL_PARAMETER_KEY, commentsUrl);
+				activity.startActivity(targetIntent);
+			}
+		});
+
 		TextView commentCountView = (TextView) postHolder.findViewById(R.id.post_comment_count);
 		commentCountView.setText(formatScore(redditPost.getNum_comments()));
 	}
