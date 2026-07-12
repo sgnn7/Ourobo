@@ -1,12 +1,17 @@
 package org.sgnn7.ourobo.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.sgnn7.ourobo.authentication.SessionManager;
 import org.sgnn7.ourobo.data.UrlFileType;
 
+import okhttp3.Cookie;
+import okhttp3.CookieJar;
 import okhttp3.FormBody;
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -18,14 +23,70 @@ public class HttpUtils {
 
 	private static final String USER_AGENT = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36";
 
+	// Reddit's edge blocks anonymous .json requests without session_tracker/loid cookies,
+	// which are only set by an HTML page load. We prime them once per process.
+	private static final String COOKIE_WARMUP_URL = "https://old.reddit.com/";
+	private static volatile boolean cookiesWarmed = false;
+
+	private static final CookieJar cookieJar = new CookieJar() {
+		private final List<Cookie> store = new ArrayList<>();
+
+		@Override
+		public synchronized void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
+			for (Cookie incoming : cookies) {
+				store.removeIf(existing -> existing.name().equals(incoming.name())
+						&& existing.domain().equals(incoming.domain())
+						&& existing.path().equals(incoming.path()));
+				store.add(incoming);
+			}
+		}
+
+		@Override
+		public synchronized List<Cookie> loadForRequest(HttpUrl url) {
+			List<Cookie> result = new ArrayList<>();
+			long now = System.currentTimeMillis();
+			for (Cookie cookie : store) {
+				if (cookie.expiresAt() > now && cookie.matches(url)) {
+					result.add(cookie);
+				}
+			}
+			return result;
+		}
+	};
+
 	private static final OkHttpClient client = new OkHttpClient.Builder()
 			.connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
 			.readTimeout(DOWNLOAD_TIMEOUT, TimeUnit.SECONDS)
+			.cookieJar(cookieJar)
 			.addInterceptor(chain -> chain.proceed(
 					chain.request().newBuilder()
 							.header("User-Agent", USER_AGENT)
 							.build()))
 			.build();
+
+	private static void ensureCookiesWarmed(String uri) {
+		if (cookiesWarmed || !uri.contains("reddit.com")) {
+			return;
+		}
+		synchronized (HttpUtils.class) {
+			if (cookiesWarmed) {
+				return;
+			}
+			try {
+				Request warmup = new Request.Builder().url(COOKIE_WARMUP_URL).build();
+				try (Response response = client.newCall(warmup).execute()) {
+					ResponseBody body = response.body();
+					if (body != null) {
+						body.close();
+					}
+					cookiesWarmed = response.isSuccessful();
+					LogMe.d("Cookie warm-up " + (cookiesWarmed ? "ok" : "failed HTTP " + response.code()));
+				}
+			} catch (Exception e) {
+				LogMe.e("Cookie warm-up error: " + e.getMessage());
+			}
+		}
+	}
 
 	public static String getPageContent(SessionManager sessionManager, String uri) {
 		byte[] bytes = getBinaryPageContent(sessionManager, uri);
@@ -43,6 +104,8 @@ public class HttpUtils {
 		byte[] pageContent = null;
 		try {
 			LogMe.d("Loading page " + uri);
+
+			ensureCookiesWarmed(uri);
 
 			Request.Builder requestBuilder = new Request.Builder().url(uri);
 			addAuthCookie(sessionManager, requestBuilder);
@@ -110,6 +173,8 @@ public class HttpUtils {
 		String responseContent = null;
 		try {
 			LogMe.e("Doing POST to " + baseUrl);
+
+			ensureCookiesWarmed(baseUrl);
 
 			FormBody.Builder formBuilder = new FormBody.Builder();
 			for (Map.Entry<String, String> entry : parameterMap.entrySet()) {
