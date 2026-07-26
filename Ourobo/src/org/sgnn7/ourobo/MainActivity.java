@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 	private static final String REDDIT_HOST = "reddit.com";
 
 	private static final String MAIN_SUBDOMAIN = "www.";
-	private static final String JSON_SUBDOMAIN = "www.";
+	private static final String JSON_SUBDOMAIN = "old.";
 	private static final String MOBILE_SUBDOMAIN = "i.";
 	private static final String JSON_PATH_SUFFIX = "/.json";
 
