@@ -2,6 +2,13 @@
 
 A lightweight Reddit client for Android.
 
+⚠️ **As of Sep 2026, Reddit has made it extremely difficult to use their open APIs without authentication, which was one of my main drivers for creating this app. As such, this app is unlikely to work anymore and unlikely to get updates. 15 years of use is a good run though!** ⚠️
+
+🪦
+
+> Initial commit
+> sgnn7 committed on Jun 1, 2011
+
 ## Features
 
 - Browse subreddits and switch between them
